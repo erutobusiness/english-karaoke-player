@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import './App.css';
 import EnglishKaraokePlayer from './components/EnglishKaraokePlayer';
 import CustomizableKaraokePlayer from './components/CustomizableKaraokePlayer';
@@ -15,19 +15,19 @@ function App() {
       <main>
         <div className="tab-container">
           <div className="tab-buttons">
-            <button 
+            <button type="button"
               className={`tab-button ${activeTab === 'basic' ? 'active' : ''}`}
               onClick={() => setActiveTab('basic')}
             >
               基本プレーヤー
             </button>
-            <button 
+            <button type="button"
               className={`tab-button ${activeTab === 'customizable' ? 'active' : ''}`}
               onClick={() => setActiveTab('customizable')}
             >
               カスタマイズ
             </button>
-            <button 
+            <button type="button"
               className={`tab-button ${activeTab === 'advanced' ? 'active' : ''}`}
               onClick={() => setActiveTab('advanced')}
             >

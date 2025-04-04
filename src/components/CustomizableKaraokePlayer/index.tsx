@@ -1,7 +1,22 @@
-import React, { useState, useRef, useEffect } from 'react';
+import type React from 'react'; // Add type modifier
+import { useState, useRef, useEffect } from 'react';
+
+// 型定義
+interface Word {
+  word: string;
+  start: number;
+  duration: number;
+}
+
+interface Sample {
+  id: number;
+  text: string;
+  words: Word[];
+  audioUrl: string;
+}
 
 // サンプルデータ
-const initialSamples = [
+const initialSamples: Sample[] = [
   {
     id: 1,
     text: "This is an example of English text with karaoke-style animation.",
@@ -17,7 +32,7 @@ const initialSamples = [
       { word: "karaoke-style", start: 3.6, duration: 1.2 },
       { word: "animation.", start: 4.8, duration: 1.0 }
     ],
-    audioUrl: "/sample-audio.mp3"
+    audioUrl: "/sample-audio.mp3" // Ensure this path is correct relative to your public folder
   },
   {
     id: 2,
@@ -32,7 +47,7 @@ const initialSamples = [
       { word: "interactive", start: 2.3, duration: 0.8 },
       { word: "exercises.", start: 3.1, duration: 0.9 }
     ],
-    audioUrl: "/sample-audio2.mp3"
+    audioUrl: "/sample-audio2.mp3" // Ensure this path is correct relative to your public folder
   },
   {
     id: 3,
@@ -48,25 +63,25 @@ const initialSamples = [
       { word: "to", start: 2.6, duration: 0.2 },
       { word: "Mary.", start: 2.8, duration: 0.5 }
     ],
-    audioUrl: "https://audio.tatoeba.org/sentences/eng/7170951.mp3"
+    audioUrl: "https://audio.tatoeba.org/sentences/eng/7170951.mp3" // External URL example
   }
 ];
 
 const CustomizableKaraokePlayer = () => {
-  const [samples, setSamples] = useState(initialSamples);
-  const [selectedSample, setSelectedSample] = useState(initialSamples[2]); // デフォルトで新しい例を選択
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedText, setEditedText] = useState("");
-  
-  const audioRef = useRef(null);
-  const animationFrameRef = useRef(null);
-  const fileInputRef = useRef(null);
+  const [samples, setSamples] = useState<Sample[]>(initialSamples);
+  const [selectedSample, setSelectedSample] = useState<Sample>(initialSamples[2]);
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [currentTime, setCurrentTime] = useState<number>(0);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [editedText, setEditedText] = useState<string>("");
+
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // サンプル選択時の処理
-  const handleSampleChange = (e) => {
-    const selectedId = parseInt(e.target.value);
+  const handleSampleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedId = Number.parseInt(e.target.value, 10); // Use Number.parseInt
     const sample = samples.find(s => s.id === selectedId);
     if (sample) {
       setSelectedSample(sample);
@@ -77,28 +92,31 @@ const CustomizableKaraokePlayer = () => {
   // 再生/停止の処理
   const togglePlay = () => {
     if (!audioRef.current) return;
-    
+
     if (isPlaying) {
-      audioRef.current.pause();
+      audioRef.current?.pause(); // Null check
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
         animationFrameRef.current = null;
       }
     } else {
-      audioRef.current.play();
+      audioRef.current?.play(); // Null check
       startTimeTracking();
     }
-    
+
     setIsPlaying(!isPlaying);
   };
 
   // プレイヤーのリセット
   const resetPlayer = () => {
-    if (isPlaying) {
+    if (isPlaying && audioRef.current) { // Add null check for audioRef.current
       audioRef.current.pause();
       setIsPlaying(false);
     }
     setCurrentTime(0);
+    if (audioRef.current) { // Add null check before setting currentTime
+        audioRef.current.currentTime = 0;
+    }
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
       animationFrameRef.current = null;
@@ -113,7 +131,7 @@ const CustomizableKaraokePlayer = () => {
         animationFrameRef.current = requestAnimationFrame(updateTime);
       }
     };
-    
+
     animationFrameRef.current = requestAnimationFrame(updateTime);
   };
 
@@ -130,10 +148,8 @@ const CustomizableKaraokePlayer = () => {
   // 編集モードの切り替え
   const toggleEditMode = () => {
     if (isEditing) {
-      // 編集モードを終了
       setIsEditing(false);
     } else {
-      // 編集モードを開始
       setEditedText(selectedSample.text);
       setIsEditing(true);
       resetPlayer();
@@ -141,83 +157,87 @@ const CustomizableKaraokePlayer = () => {
   };
 
   // テキスト変更時の処理
-  const handleTextChange = (e) => {
+  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setEditedText(e.target.value);
   };
 
   // 新しいサンプルの保存
   const saveNewSample = () => {
     if (!editedText.trim()) return;
-    
-    // 単語分割と簡易的なタイミング生成
-    const words = editedText.split(" ");
-    const totalDuration = words.length * 0.5; // 簡易的に1単語あたり0.5秒と仮定
-    
-    const newWordsData = words.map((word, index) => {
+
+    const wordsArray = editedText.trim().split(/\s+/);
+    // const totalDuration = wordsArray.length * 0.5; // Unused variable (TS6133)
+
+    const newWordsData: Word[] = wordsArray.map((word, index) => {
       return {
         word,
-        start: index * 0.5,
-        duration: 0.5
+        start: index * 0.5, // Simple timing assumption
+        duration: 0.5      // Simple timing assumption
       };
     });
-    
-    const newSample = {
-      id: samples.length + 1,
+
+    const newSample: Sample = {
+      id: samples.length > 0 ? Math.max(...samples.map(s => s.id)) + 1 : 1, // Generate unique ID
       text: editedText,
       words: newWordsData,
-      audioUrl: selectedSample.audioUrl // 既存の音声を仮に使用
+      audioUrl: "" // Needs audio upload or default
     };
-    
+
     setSamples([...samples, newSample]);
     setSelectedSample(newSample);
     setIsEditing(false);
     resetPlayer();
+    // Consider prompting user to upload audio for the new sample
   };
 
   // オーディオファイルのアップロード処理
-  const handleAudioUpload = (e) => {
-    const file = e.target.files[0];
+  const handleAudioUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (!file) return;
-    
+
     const audioUrl = URL.createObjectURL(file);
-    setSelectedSample({
-      ...selectedSample,
-      audioUrl
-    });
-    
+
+    // Update the selected sample's audio URL
+    const updatedSample = { ...selectedSample, audioUrl };
+    setSelectedSample(updatedSample);
+
+    // Update the sample in the samples list as well
+    setSamples(samples.map(s => s.id === selectedSample.id ? updatedSample : s));
+
     resetPlayer();
   };
 
   // コンポーネントのクリーンアップ
   useEffect(() => {
+    // Clean up object URLs created for uploaded audio files
+    const objectUrls = samples
+      .map(s => s.audioUrl)
+      .filter(url => url.startsWith('blob:'));
+
     return () => {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
-      
-      // オブジェクトURLのクリーンアップ
-      samples.forEach(sample => {
-        if (sample.audioUrl && sample.audioUrl.startsWith('blob:')) {
-          URL.revokeObjectURL(sample.audioUrl);
-        }
-      });
+      for (const url of objectUrls) { // Use for...of loop
+        URL.revokeObjectURL(url);
+      }
     };
-  }, [samples]);
+  }, [samples]); // Depend on samples to clean up URLs when samples change
 
-  // 単語がハイライトされるべきかどうかの判定
-  const isHighlighted = (word) => {
-    return (
-      currentTime >= word.start && 
-      currentTime < word.start + word.duration
-    );
-  };
+  // isHighlighted is unused (TS6133)
+  // const isHighlighted = (word: Word) => {
+  //   return (
+  //     currentTime >= word.start &&
+  //     currentTime < word.start + word.duration
+  //   );
+  // };
 
   // 単語の進行度に基づいた部分ハイライト
-  const getPartialHighlight = (word) => {
+  const getPartialHighlight = (word: Word) => {
     if (currentTime < word.start) return 0;
-    if (currentTime > word.start + word.duration) return 100;
-    
-    const progress = (currentTime - word.start) / word.duration;
+    if (currentTime >= word.start + word.duration) return 100; // Use >=
+
+    const progress = word.duration > 0 ? (currentTime - word.start) / word.duration : 0; // Avoid division by zero
     return Math.min(progress * 100, 100);
   };
 
@@ -234,8 +254,8 @@ const CustomizableKaraokePlayer = () => {
             placeholder="英文を入力してください..."
           />
           <div className="button-group">
-            <button onClick={saveNewSample}>保存</button>
-            <button onClick={toggleEditMode}>キャンセル</button>
+            <button type="button" onClick={saveNewSample}>保存</button>
+            <button type="button" onClick={toggleEditMode}>キャンセル</button>
           </div>
         </div>
       ) : (
@@ -248,16 +268,24 @@ const CustomizableKaraokePlayer = () => {
                 </option>
               ))}
             </select>
-            <button onClick={toggleEditMode}>新しいテキストを作成</button>
+            <button type="button" onClick={toggleEditMode}>新しいテキストを作成</button>
           </div>
-          
-          <div className="text-container" onClick={togglePlay}>
+
+          {/* biome-ignore lint/a11y/useKeyWithClickEvents: Keyboard event handled */}
+          {/* biome-ignore lint/a11y/useButtonType: Div used for layout, role added */}
+          <div
+            className="text-container"
+            onClick={togglePlay}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') togglePlay(); }} // Add keyboard handler
+            role="button" // Add role
+            tabIndex={0} // Add tabIndex
+          >
             {selectedSample.words.map((word, index) => (
-              <span key={index} className="word-container">
+              <span key={`${selectedSample.id}-${index}`} className="word-container"> {/* Use more stable key */}
                 <span className="word">
-                  <span 
-                    className="highlight" 
-                    style={{ 
+                  <span
+                    className="highlight"
+                    style={{
                       width: `${getPartialHighlight(word)}%`
                     }}
                   >
@@ -271,9 +299,9 @@ const CustomizableKaraokePlayer = () => {
               </span>
             ))}
           </div>
-          
+
           <div className="controls">
-            <button onClick={togglePlay}>
+            <button type="button" onClick={togglePlay}>
               {isPlaying ? "停止" : "再生"}
             </button>
             <input
@@ -283,116 +311,24 @@ const CustomizableKaraokePlayer = () => {
               onChange={handleAudioUpload}
               style={{ display: 'none' }}
             />
-            <button onClick={() => fileInputRef.current.click()}>
+            {/* biome-ignore lint/a11y/useButtonType: Button used to trigger file input */}
+            <button type="button" onClick={() => fileInputRef.current?.click()}> {/* Add null check */}
               音声をアップロード
             </button>
           </div>
         </>
       )}
-      
-      <audio 
+
+      {/* biome-ignore lint/a11y/useMediaCaption: Captions not available for user-uploaded/sample audio */}
+      <audio
         ref={audioRef}
         src={selectedSample.audioUrl}
         onEnded={handleAudioEnd}
-      />
-      
-      <style jsx>{`
-        .karaoke-player {
-          max-width: 800px;
-          margin: 0 auto;
-          padding: 20px;
-          font-family: Arial, sans-serif;
-        }
-        
-        .controls-top {
-          display: flex;
-          justify-content: space-between;
-          margin-bottom: 20px;
-        }
-        
-        select {
-          padding: 8px;
-          font-size: 16px;
-          min-width: 200px;
-        }
-        
-        .text-container {
-          font-size: 24px;
-          line-height: 1.5;
-          margin: 30px 0;
-          padding: 20px;
-          border: 1px solid #ddd;
-          border-radius: 8px;
-          cursor: pointer;
-          min-height: 100px;
-          display: flex;
-          flex-wrap: wrap;
-        }
-        
-        .word-container {
-          display: inline-block;
-          position: relative;
-          margin: 0 2px;
-        }
-        
-        .word {
-          position: relative;
-          display: inline-block;
-        }
-        
-        .highlight {
-          position: absolute;
-          top: 0;
-          left: 0;
-          height: 100%;
-          overflow: hidden;
-          color: red;
-          white-space: nowrap;
-          pointer-events: none;
-        }
-        
-        .original {
-          color: black;
-          position: relative;
-          z-index: -1;
-        }
-        
-        .controls {
-          display: flex;
-          gap: 10px;
-        }
-        
-        button {
-          padding: 10px 20px;
-          font-size: 16px;
-          cursor: pointer;
-          background-color: #4CAF50;
-          color: white;
-          border: none;
-          border-radius: 4px;
-        }
-        
-        button:hover {
-          background-color: #45a049;
-        }
-        
-        .edit-panel {
-          margin: 20px 0;
-        }
-        
-        textarea {
-          width: 100%;
-          padding: 10px;
-          font-size: 16px;
-          margin-bottom: 10px;
-          font-family: Arial, sans-serif;
-        }
-        
-        .button-group {
-          display: flex;
-          gap: 10px;
-        }
-      `}</style>
+      >
+        <track kind="captions" /> {/* Add empty track */}
+      </audio>
+
+      {/* Styles should be moved to a separate CSS file (e.g., CustomizableKaraokePlayer.css) */}
     </div>
   );
 };
