@@ -33,12 +33,28 @@ const initialSamples = [
       { word: "exercises.", start: 3.1, duration: 0.9 }
     ],
     audioUrl: "/sample-audio2.mp3"
+  },
+  {
+    id: 3,
+    text: "I know that Tom would never lie to Mary.",
+    words: [
+      { word: "I", start: 0, duration: 0.2 },
+      { word: "know", start: 0.2, duration: 0.4 },
+      { word: "that", start: 0.6, duration: 0.3 },
+      { word: "Tom", start: 0.9, duration: 0.4 },
+      { word: "would", start: 1.3, duration: 0.4 },
+      { word: "never", start: 1.7, duration: 0.5 },
+      { word: "lie", start: 2.2, duration: 0.4 },
+      { word: "to", start: 2.6, duration: 0.2 },
+      { word: "Mary.", start: 2.8, duration: 0.5 }
+    ],
+    audioUrl: "https://audio.tatoeba.org/sentences/eng/7170951.mp3"
   }
 ];
 
 const CustomizableKaraokePlayer = () => {
   const [samples, setSamples] = useState(initialSamples);
-  const [selectedSample, setSelectedSample] = useState(initialSamples[0]);
+  const [selectedSample, setSelectedSample] = useState(initialSamples[2]); // デフォルトで新しい例を選択
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
