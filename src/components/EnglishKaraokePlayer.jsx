@@ -2,20 +2,19 @@ import React, { useState, useRef, useEffect } from 'react';
 
 // 英文と各単語のタイミング情報を定義
 const sampleText = {
-  text: "This is an example of English text with karaoke-style animation.",
+  text: "I know that Tom would never lie to Mary.",
   words: [
-    { word: "This", start: 0, duration: 0.5 },
-    { word: "is", start: 0.5, duration: 0.3 },
-    { word: "an", start: 0.8, duration: 0.3 },
-    { word: "example", start: 1.1, duration: 0.7 },
-    { word: "of", start: 1.8, duration: 0.3 },
-    { word: "English", start: 2.1, duration: 0.6 },
-    { word: "text", start: 2.7, duration: 0.5 },
-    { word: "with", start: 3.2, duration: 0.4 },
-    { word: "karaoke-style", start: 3.6, duration: 1.2 },
-    { word: "animation.", start: 4.8, duration: 1.0 }
+    { word: "I", start: 0, duration: 0.2 },
+    { word: "know", start: 0.2, duration: 0.4 },
+    { word: "that", start: 0.6, duration: 0.3 },
+    { word: "Tom", start: 0.9, duration: 0.4 },
+    { word: "would", start: 1.3, duration: 0.4 },
+    { word: "never", start: 1.7, duration: 0.5 },
+    { word: "lie", start: 2.2, duration: 0.4 },
+    { word: "to", start: 2.6, duration: 0.2 },
+    { word: "Mary.", start: 2.8, duration: 0.5 }
   ],
-  audioUrl: "/sample-audio.mp3" // オーディオファイルのパス
+  audioUrl: "https://audio.tatoeba.org/sentences/eng/7170951.mp3" // オーディオファイルのパス
 };
 
 const EnglishKaraokePlayer = () => {
