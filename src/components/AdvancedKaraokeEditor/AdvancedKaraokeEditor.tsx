@@ -1,7 +1,8 @@
 import type React from 'react';
 import { useState, useRef, useEffect, useCallback } from 'react';
-import './index.css';
-import { useKaraokePlayer, type WordInfo } from '../../hooks/useKaraokePlayer'; // フックと WordInfo をインポート
+import './AdvancedKaraokeEditor.css';
+import { useKaraokePlayer } from '../../hooks/useKaraokePlayer';
+import type { WordInfo } from '../EnglishKaraokePlayer/data';
 
 // Word 型定義は削除し、WordInfo を使用
 
@@ -21,15 +22,25 @@ const AdvancedKaraokeEditor = () => {
     audioRef,
     isPlaying,
     currentTime,
-    togglePlay,
+    play, // togglePlay の代わりに play を受け取る
+    pause, // pause を受け取る
     getPartialHighlight,
     handleAudioEnd: hookHandleAudioEnd,
-    resetPlayer,
+    reset: resetPlayer,
   } = useKaraokePlayer({
     audioUrl: audioUrl,
     words: words,
     onEnded: () => { console.log("Track ended in editor"); }
   });
+
+  // 再生/停止を切り替える関数
+  const handleTogglePlay = () => {
+    if (isPlaying) {
+      pause();
+    } else {
+      play();
+    }
+  };
 
   // オーディオファイルのアップロード処理
   const handleAudioUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -273,10 +284,9 @@ const AdvancedKaraokeEditor = () => {
             setWords(validatedWords);
             setText(project.text || validatedWords.map((w: WordInfo) => w.word).join(' ')); // WordInfo 型を使用
             setAudioDuration(project.audioDuration || 0);
-            // Reset player state after importing
             resetPlayer();
             setSelectedWordIndex(-1);
-            setPreviewMode(false); // Go back to edit mode
+            setPreviewMode(false);
           } else {
              console.error('Invalid project file structure');
              alert('プロジェクトファイルの構造が無効です。');
@@ -296,7 +306,7 @@ const AdvancedKaraokeEditor = () => {
   };
 
   return (
-    <div className="karaoke-editor">
+    <div className="karaoke-container"> {/* Updated class name */}
       <h2>英語カラオケエディタ</h2>
 
       <div className="audio-section">
@@ -309,8 +319,8 @@ const AdvancedKaraokeEditor = () => {
           className="audio-input"
         />
         {audioUrl && (
-          <div className="audio-controls">
-            <button type="button" onClick={togglePlay}>
+          <div className="controls-container audio-controls"> {/* Updated class name */}
+            <button type="button" className="karaoke-button" onClick={handleTogglePlay}> {/* Use handleTogglePlay */}
               {isPlaying ? "停止" : "再生"}
             </button>
             <div className="audio-info">
@@ -339,22 +349,22 @@ const AdvancedKaraokeEditor = () => {
                 placeholder="英文を入力してください..."
               />
               <div className="button-group">
-                <button type="button" onClick={splitText}>分割して編集</button>
-                <button type="button" onClick={() => setIsEditingText(false)}>キャンセル</button>
+                <button type="button" className="karaoke-button" onClick={splitText}>分割して編集</button> {/* Added class name */}
+                <button type="button" className="karaoke-button" onClick={() => setIsEditingText(false)}>キャンセル</button> {/* Added class name */}
               </div>
             </div>
           ) : words.length === 0 ? (
             <div className="text-section">
-              <button type="button" onClick={() => setIsEditingText(true)}>英文を入力</button>
+              <button type="button" className="karaoke-button" onClick={() => setIsEditingText(true)}>英文を入力</button> {/* Added class name */}
             </div>
           ) : previewMode ? (
             <div className="preview-section">
               <h3>プレビュー</h3>
               <button
                 type="button"
-                className="text-container"
-                onClick={togglePlay}
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') togglePlay(); }}
+                className="karaoke-text-display" /* Updated class name */
+                onClick={handleTogglePlay} /* Use handleTogglePlay */
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleTogglePlay(); }} /* Use handleTogglePlay */
               >
                 {words.map((word: WordInfo, index: number) => (
                   <span key={`${word.word}-${index}`} className="karaoke-word-container">
@@ -375,14 +385,14 @@ const AdvancedKaraokeEditor = () => {
                   </span>
                 ))}
               </button>
-              <button type="button" onClick={togglePreviewMode}>編集モードに戻る</button>
+              <button type="button" className="karaoke-button" onClick={togglePreviewMode}>編集モードに戻る</button> {/* Added class name */}
             </div>
           ) : (
             <div className="edit-section">
-              <div className="controls-top">
-                <button type="button" onClick={() => setIsEditingText(true)}>テキストを編集</button>
-                <button type="button" onClick={togglePreviewMode}>プレビュー</button>
-                <button type="button" onClick={exportProject}>プロジェクトを保存</button>
+              <div className="controls-container controls-top"> {/* Updated class name */}
+                <button type="button" className="karaoke-button" onClick={() => setIsEditingText(true)}>テキストを編集</button> {/* Added class name */}
+                <button type="button" className="karaoke-button" onClick={togglePreviewMode}>プレビュー</button> {/* Added class name */}
+                <button type="button" className="karaoke-button" onClick={exportProject}>プロジェクトを保存</button> {/* Added class name */}
                 <input
                   type="file"
                   accept=".json"
@@ -390,7 +400,7 @@ const AdvancedKaraokeEditor = () => {
                   style={{ display: 'none' }}
                   id="import-project"
                 />
-                <label htmlFor="import-project" className="button">
+                <label htmlFor="import-project" className="karaoke-button"> {/* Updated class name */}
                   プロジェクトを読み込む
                 </label>
               </div>
@@ -462,8 +472,8 @@ const AdvancedKaraokeEditor = () => {
                       長さ: {words[selectedWordIndex]?.duration.toFixed(2)}秒
                     </div>
                     <div className="button-group">
-                      <button type="button" onClick={setWordStart}>開始時間を設定</button>
-                      <button type="button" onClick={setWordEnd}>終了時間を設定</button>
+                      <button type="button" className="karaoke-button" onClick={setWordStart}>開始時間を設定</button> {/* Added class name */}
+                      <button type="button" className="karaoke-button" onClick={setWordEnd}>終了時間を設定</button> {/* Added class name */}
                     </div>
                   </div>
                 )}

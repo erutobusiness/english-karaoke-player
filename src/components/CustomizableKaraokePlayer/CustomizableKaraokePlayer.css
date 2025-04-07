@@ -1,0 +1,55 @@
+.karaoke-container {
+  max-width: 800px; /* Specific width */
+}
+
+/* Top controls container */
+.controls-container.controls-top {
+  justify-content: space-between; /* Specific alignment */
+  margin-bottom: 20px; /* Specific margin */
+  /* Inherits base display, gap, align-items */
+}
+
+/* Select element styling */
+select {
+  padding: 8px 12px;
+  font-size: 16px;
+  min-width: 200px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* Bottom controls container */
+.controls-container.controls-bottom {
+  margin-top: 20px; /* Specific margin */
+  /* Inherits base display, gap, align-items */
+}
+
+
+/* Edit panel styling */
+.edit-panel {
+  margin: 20px 0;
+  padding: 20px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+/* Textarea styling */
+textarea {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  margin-bottom: 10px;
+  font-family: Arial, sans-serif;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  min-height: 100px;
+}
+
+/* Button group styling */
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}

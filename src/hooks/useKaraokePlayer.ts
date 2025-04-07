@@ -1,18 +1,10 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-
-// EnglishKaraokePlayer/data.ts または CustomizableKaraokePlayer/index.tsx からインポートするか、
-// 共通の型定義ファイルを作成してそこからインポートすることを検討
-// ここでは仮に WordInfo 型を定義します
-export interface WordInfo {
-  word: string;
-  start: number;
-  duration: number;
-}
+import type { WordInfo } from '../components/EnglishKaraokePlayer/data';
 
 interface UseKaraokePlayerProps {
   audioUrl: string;
   words: WordInfo[];
-  onEnded?: () => void; // オプショナルな onEnded コールバック
+  onEnded?: () => void;
 }
 
 export const useKaraokePlayer = ({ audioUrl, onEnded }: UseKaraokePlayerProps) => {
@@ -45,34 +37,47 @@ export const useKaraokePlayer = ({ audioUrl, onEnded }: UseKaraokePlayerProps) =
     }
   }, []); // 依存配列は空でOK、ref の current へのアクセスは依存関係にならない
 
-  // 再生/停止ボタンのハンドラ
-  const togglePlay = useCallback(() => {
-    setIsPlaying(prevIsPlaying => !prevIsPlaying);
-  }, []);
+  // 再生を開始する関数
+  const play = useCallback(() => {
+    if (!audioRef.current) return;
+    setIsPlaying(true);
+    audioRef.current.pause();
+
+    // 時間をおいて再生
+    setTimeout(() => {
+      if (!audioRef.current) return;
+      audioRef.current.play().then(() => {
+        startTimeTracking(); // 再生成功したら時間追跡開始
+      });
+    }, 0);
+  }, [startTimeTracking]);
+
+  // 再生を停止する関数
+  const pause = useCallback(() => {
+    if (!audioRef.current) return;
+    setIsPlaying(false);
+    audioRef.current.pause();
+    cancelAnimationFrameIfExists(); // アニメーションフレームをキャンセル
+  }, [cancelAnimationFrameIfExists]); // isPlaying に依存
 
   // オーディオ終了時の処理
   const handleAudioEnd = useCallback(() => {
     cancelAnimationFrameIfExists();
     setIsPlaying(false);
-    setCurrentTime(0); // 時間をリセット
-    // 外部から渡された onEnded コールバックを実行
-    if (onEnded) {
-      onEnded();
-    }
+    setCurrentTime(0);
+    if (onEnded) { onEnded(); }
   }, [onEnded, cancelAnimationFrameIfExists]); // cancelAnimationFrameIfExists を追加
 
   // プレイヤーのリセット（外部から呼び出せるように）
-  const resetPlayer = useCallback(() => {
+  const reset = useCallback(() => {
     if (audioRef.current) {
-        if (isPlaying) {
-            audioRef.current.pause();
-            setIsPlaying(false);
-        }
+        audioRef.current.pause();
+        setIsPlaying(false);
         audioRef.current.currentTime = 0;
         setCurrentTime(0);
     }
     cancelAnimationFrameIfExists();
-  }, [isPlaying, cancelAnimationFrameIfExists]); // cancelAnimationFrameIfExists を追加
+  }, [cancelAnimationFrameIfExists]);
 
   // audioUrl が変わった時に audio の src を更新
   useEffect(() => {
@@ -83,43 +88,8 @@ export const useKaraokePlayer = ({ audioUrl, onEnded }: UseKaraokePlayerProps) =
       setCurrentTime(0);       // 時間をリセット
       setIsPlaying(false);     // 再生状態を停止にリセット
       cancelAnimationFrameIfExists(); // アニメーションフレームもキャンセル
-
-      // wasPlaying のロジックは削除 (URL変更時は常に停止させるため)
     }
-    // audioUrl が変わるたびに実行
-    // resetPlayer と isPlaying を依存配列から削除
   }, [audioUrl, cancelAnimationFrameIfExists]);
-
-  // isPlaying ステートに基づいて再生/停止を実行
-  useEffect(() => {
-    if (!audioRef.current) return;
-
-    if (isPlaying) {
-      audioRef.current.play().then(() => {
-        startTimeTracking(); // 再生成功したら時間追跡開始
-      }).catch(error => {
-        console.error("Audio play failed:", error);
-        setIsPlaying(false); // 失敗したら再生状態をリセット
-        cancelAnimationFrameIfExists(); // 念のためキャンセル
-      });
-    } else {
-      // isPlaying が false になった場合、または初期状態
-      if (!audioRef.current.paused) {
-          audioRef.current.pause();
-      }
-      cancelAnimationFrameIfExists(); // アニメーションフレームをキャンセル
-    }
-
-    // クリーンアップ関数
-    return () => {
-      // コンポーネントのアンマウント時にもキャンセル
-      cancelAnimationFrameIfExists();
-      // アンマウント時に pause するかは議論の余地あり (audio 要素自体が消えるため不要かもしれない)
-      // if (audioRef.current && !audioRef.current.paused) {
-      //   audioRef.current.pause();
-      // }
-    };
-  }, [isPlaying, startTimeTracking, cancelAnimationFrameIfExists]); // cancelAnimationFrameIfExists を追加
 
   // 単語の進行度に基づいた部分ハイライト
   const getPartialHighlight = useCallback((word: WordInfo): number => {
@@ -135,9 +105,10 @@ export const useKaraokePlayer = ({ audioUrl, onEnded }: UseKaraokePlayerProps) =
     audioRef,
     currentTime,
     isPlaying,
-    togglePlay,
+    play,         // togglePlay の代わりに play を公開
+    pause,        // pause を公開
+    reset,    // 外部からリセットできるように公開
     getPartialHighlight,
     handleAudioEnd, // audio 要素の onEnded に渡すため公開
-    resetPlayer,    // 外部からリセットできるように公開
   };
 };

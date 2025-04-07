@@ -1,0 +1,100 @@
+/* Base Container */
+.karaoke-container {
+  margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  user-select: none;
+}
+
+/* Base Text Display Area */
+.karaoke-text-display {
+  font-size: 24px;
+  line-height: 1.5;
+  cursor: pointer;
+  margin: 30px 0;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  min-height: 100px;
+  display: flex; /* Use flexbox for word wrapping */
+  flex-wrap: wrap;
+  align-items: baseline;
+  background-color: #fff;
+}
+
+/* Base Controls Container */
+.controls-container {
+  display: flex;
+  gap: 10px;
+  align-items: center; /* Common alignment */
+  /* Specific layout (margin, justify-content) defined by component */
+}
+
+/* Base Button Style */
+.karaoke-button {
+  padding: 10px 20px; /* Default padding */
+  font-size: 16px; /* Default font size */
+  cursor: pointer;
+  background-color: #4CAF50; /* Default green background */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+  text-align: center;
+  display: inline-block;
+  text-decoration: none;
+}
+
+.karaoke-button:hover {
+  background-color: #45a049; /* Darker green on hover */
+}
+
+.karaoke-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* --- Animation Styles --- */
+
+.karaoke-word-container {
+  display: inline-block;
+  position: relative;
+  vertical-align: baseline;
+  margin: 0 2px;
+}
+
+.karaoke-word {
+  position: relative;
+  display: inline-block;
+  white-space: pre; /* Preserve spaces */
+}
+
+.karaoke-original-text {
+  position: relative;
+  z-index: 0;
+  color: black;
+}
+
+.karaoke-highlight-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 1;
+
+  color: var(--karaoke-highlight-color, red);
+  background-color: var(--karaoke-highlight-bg-color, yellow);
+  mix-blend-mode: var(--karaoke-highlight-blend-mode, multiply);
+}
+
+.preview-section {
+  color: black;
+}
+.preview-section .karaoke-highlight-layer {
+  --karaoke-highlight-color: red;
+  --karaoke-highlight-bg-color: yellow;
+  --karaoke-highlight-blend-mode: multiply;
+}

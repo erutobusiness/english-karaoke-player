@@ -1,70 +1,11 @@
 import type React from 'react';
 import { useState, useRef, useEffect } from 'react';
-import './index.css'; // Import the CSS file
-import { useKaraokePlayer, type WordInfo } from '../../hooks/useKaraokePlayer';
-
-interface Sample {
-  id: number;
-  text: string;
-  words: WordInfo[];
-  audioUrl: string;
-}
-
-// サンプルデータ
-const initialSamples: Sample[] = [
-  {
-    id: 1,
-    text: "This is an example of English text with karaoke-style animation.",
-    words: [
-      { word: "This", start: 0, duration: 0.5 },
-      { word: "is", start: 0.5, duration: 0.3 },
-      { word: "an", start: 0.8, duration: 0.3 },
-      { word: "example", start: 1.1, duration: 0.7 },
-      { word: "of", start: 1.8, duration: 0.3 },
-      { word: "English", start: 2.1, duration: 0.6 },
-      { word: "text", start: 2.7, duration: 0.5 },
-      { word: "with", start: 3.2, duration: 0.4 },
-      { word: "karaoke-style", start: 3.6, duration: 1.2 },
-      { word: "animation.", start: 4.8, duration: 1.0 }
-    ],
-    audioUrl: "/sample-audio.mp3" // Ensure this path is correct relative to your public folder
-  },
-  {
-    id: 2,
-    text: "Learning English can be fun with interactive exercises.",
-    words: [
-      { word: "Learning", start: 0, duration: 0.6 },
-      { word: "English", start: 0.6, duration: 0.5 },
-      { word: "can", start: 1.1, duration: 0.3 },
-      { word: "be", start: 1.4, duration: 0.2 },
-      { word: "fun", start: 1.6, duration: 0.4 },
-      { word: "with", start: 2.0, duration: 0.3 },
-      { word: "interactive", start: 2.3, duration: 0.8 },
-      { word: "exercises.", start: 3.1, duration: 0.9 }
-    ],
-    audioUrl: "/sample-audio2.mp3" // Ensure this path is correct relative to your public folder
-  },
-  {
-    id: 3,
-    text: "I know that Tom would never lie to Mary.",
-    words: [
-      { word: "I", start: 0, duration: 0.2 },
-      { word: "know", start: 0.2, duration: 0.4 },
-      { word: "that", start: 0.6, duration: 0.3 },
-      { word: "Tom", start: 0.9, duration: 0.4 },
-      { word: "would", start: 1.3, duration: 0.4 },
-      { word: "never", start: 1.7, duration: 0.5 },
-      { word: "lie", start: 2.2, duration: 0.4 },
-      { word: "to", start: 2.6, duration: 0.2 },
-      { word: "Mary.", start: 2.8, duration: 0.5 }
-    ],
-    audioUrl: "https://audio.tatoeba.org/sentences/eng/7170951.mp3" // External URL example
-  }
-];
+import { useKaraokePlayer } from '../../hooks/useKaraokePlayer';
+import { type WordInfo, type KaraokeText, karaokeData } from '../EnglishKaraokePlayer/data';
 
 const CustomizableKaraokePlayer = () => {
-  const [samples, setSamples] = useState<Sample[]>(initialSamples);
-  const [selectedSample, setSelectedSample] = useState<Sample>(initialSamples[2]);
+  const [samples, setSamples] = useState<KaraokeText[]>(karaokeData);
+  const [selectedSample, setSelectedSample] = useState<KaraokeText>(karaokeData[0]);
   // isPlaying と currentTime はフックから取得するので削除
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [editedText, setEditedText] = useState<string>("");
@@ -76,10 +17,11 @@ const CustomizableKaraokePlayer = () => {
   const {
     audioRef,
     isPlaying,
-    togglePlay,
+    play,
+    pause,
+    reset,
     getPartialHighlight,
-    handleAudioEnd: hookHandleAudioEnd, // フックの onEnded ハンドラ
-    resetPlayer: hookResetPlayer,      // フックのリセット関数
+    handleAudioEnd,
   } = useKaraokePlayer({
     // selectedSample が null の可能性を考慮 (初期レンダリングなど)
     audioUrl: selectedSample?.audioUrl ?? "",
@@ -91,13 +33,27 @@ const CustomizableKaraokePlayer = () => {
     }
   });
 
+  // 再生/停止を切り替える関数
+  const handleTogglePlay = () => {
+    if (isPlaying) {
+      pause();
+    } else {
+      play();
+    }
+  };
+
+  // 停止ボタンのハンドラ
+  const handleStop = () => {
+    pause(); // 再生を停止
+    reset(); // 再生位置をリセット
+  };
+
   // サンプル選択時の処理
   const handleSampleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedId = Number.parseInt(e.target.value, 10);
-    const sample = samples.find(s => s.id === selectedId);
+    const sample = samples.find(s => s.text === e.target.value);
     if (sample) {
       setSelectedSample(sample);
-      hookResetPlayer();
+      reset(); // サンプル変更時もリセット
     }
   };
 
@@ -108,7 +64,7 @@ const CustomizableKaraokePlayer = () => {
     } else {
       setEditedText(selectedSample.text);
       setIsEditing(true);
-      hookResetPlayer();
+      reset();
     }
   };
 
@@ -132,8 +88,7 @@ const CustomizableKaraokePlayer = () => {
       };
     });
 
-    const newSample: Sample = {
-      id: samples.length > 0 ? Math.max(...samples.map(s => s.id)) + 1 : 1, // Generate unique ID
+    const newSample: KaraokeText = {
       text: editedText,
       words: newWordsData,
       audioUrl: "" // Needs audio upload or default
@@ -142,7 +97,7 @@ const CustomizableKaraokePlayer = () => {
     setSamples([...samples, newSample]);
     setSelectedSample(newSample);
     setIsEditing(false);
-    hookResetPlayer();
+    reset();
   };
 
   // オーディオファイルのアップロード処理
@@ -157,9 +112,9 @@ const CustomizableKaraokePlayer = () => {
     setSelectedSample(updatedSample);
 
     // Update the sample in the samples list as well
-    setSamples(samples.map(s => s.id === selectedSample.id ? updatedSample : s));
+    setSamples(samples.map(s => s.text === selectedSample.text ? updatedSample : s));
 
-    hookResetPlayer();
+    reset();
   };
 
   // コンポーネントのクリーンアップ
@@ -178,7 +133,7 @@ const CustomizableKaraokePlayer = () => {
   }, [samples]); // Depend on samples to clean up URLs when samples change
 
   return (
-    <div className="karaoke-player">
+    <div className="karaoke-container"> {/* Updated class name */}
       {isEditing ? (
         <div className="edit-panel">
           <h3>テキストを編集</h3>
@@ -190,31 +145,31 @@ const CustomizableKaraokePlayer = () => {
             placeholder="英文を入力してください..."
           />
           <div className="button-group">
-            <button type="button" onClick={saveNewSample}>保存</button>
-            <button type="button" onClick={toggleEditMode}>キャンセル</button>
+            <button type="button" className="karaoke-button" onClick={saveNewSample}>保存</button> {/* Added class name */}
+            <button type="button" className="karaoke-button" onClick={toggleEditMode}>キャンセル</button> {/* Added class name */}
           </div>
         </div>
       ) : (
         <>
-          <div className="controls-top">
-            <select value={selectedSample.id} onChange={handleSampleChange}>
+          <div className="controls-container controls-top"> {/* Updated class name */}
+            <select value={selectedSample.text} onChange={handleSampleChange}>
               {samples.map(sample => (
-                <option key={sample.id} value={sample.id}>
+                <option key={sample.text} value={sample.text}>
                   {sample.text.substring(0, 30)}...
                 </option>
               ))}
             </select>
-            <button type="button" onClick={toggleEditMode}>新しいテキストを作成</button>
+            <button type="button" className="karaoke-button" onClick={toggleEditMode}>新しいテキストを作成</button> {/* Added class name */}
           </div>
 
           <button
             type="button" // Add type="button"
-            className="text-container"
-            onClick={togglePlay}
-            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') togglePlay(); }}
+            className="karaoke-text-display" /* Updated class name */
+            onClick={handleTogglePlay} /* Use handleTogglePlay */
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleTogglePlay(); }} /* Use handleTogglePlay */
           >
             {selectedSample?.words?.map((word, index) => ( // selectedSample が null の可能性を考慮
-              <span key={`${selectedSample.id}-${index}`} className="karaoke-word-container">
+              <span key={`${selectedSample.text}-${index}`} className="karaoke-word-container">
                 <span className="karaoke-word">
                   <span
                     className="karaoke-highlight-layer"
@@ -235,20 +190,24 @@ const CustomizableKaraokePlayer = () => {
             ))}
           </button>
 
-          <div className="controls">
-            <button type="button" onClick={togglePlay}>
-              {isPlaying ? "停止" : "再生"}
-            </button>
-            <input
-              type="file"
-              accept="audio/*"
-              ref={fileInputRef}
-              onChange={handleAudioUpload}
-              style={{ display: 'none' }}
-            />
-            <button type="button" onClick={() => fileInputRef.current?.click()}>
-              音声をアップロード
-            </button>
+          <div className="controls-container controls-bottom"> {/* Updated class name */}
+            <button type="button" className="karaoke-button" onClick={handleTogglePlay}> {/* Use handleTogglePlay */}
+              {isPlaying ? "一時停止" : "再生"} {/* ラベルをより正確に */}
+           </button>
+           {/* 停止ボタンを追加 */}
+           <button type="button" className="karaoke-button" onClick={handleStop}>
+             停止
+           </button>
+           <input
+             type="file"
+             accept="audio/*"
+             ref={fileInputRef}
+             onChange={handleAudioUpload}
+             style={{ display: 'none' }}
+           />
+           <button type="button" className="karaoke-button" onClick={() => fileInputRef.current?.click()}> {/* Added class name */}
+             音声をアップロード
+           </button>
           </div>
         </>
       )}
@@ -256,7 +215,7 @@ const CustomizableKaraokePlayer = () => {
       <audio
         ref={audioRef} // フックから取得した audioRef を使用
         src={selectedSample?.audioUrl ?? ""} // selectedSample が null の可能性を考慮
-        onEnded={hookHandleAudioEnd} // フックから取得した onEnded ハンドラを使用
+        onEnded={handleAudioEnd} // フックから取得した onEnded ハンドラを使用
       >
         <track kind="captions" />
       </audio>

@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import './App.css';
-import EnglishKaraokePlayer from './components/EnglishKaraokePlayer';
-import CustomizableKaraokePlayer from './components/CustomizableKaraokePlayer';
-import AdvancedKaraokeEditor from './components/AdvancedKaraokeEditor';
+import './styles/App.css';
+import './styles/karaoke.css';
+import EnglishKaraokePlayer from './components/EnglishKaraokePlayer/EnglishKaraokePlayer';
+import CustomizableKaraokePlayer from './components/CustomizableKaraokePlayer/CustomizableKaraokePlayer';
+import AdvancedKaraokeEditor from './components/AdvancedKaraokeEditor/AdvancedKaraokeEditor';
 
 function App() {
   const [activeTab, setActiveTab] = useState('basic');
