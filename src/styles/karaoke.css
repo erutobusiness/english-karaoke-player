@@ -78,6 +78,15 @@
   color: black;
 }
 
+.preview-section {
+  color: black;
+}
+.preview-section .karaoke-highlight-layer {
+  --karaoke-highlight-color: red;
+  --karaoke-highlight-bg-color: yellow;
+  --karaoke-highlight-blend-mode: multiply;
+}
+
 .karaoke-highlight-layer {
   position: absolute;
   top: 0;
@@ -90,14 +99,5 @@
 
   color: var(--karaoke-highlight-color, red);
   background-color: var(--karaoke-highlight-bg-color, yellow);
-  mix-blend-mode: var(--karaoke-highlight-blend-mode, multiply);
-}
-
-.preview-section {
-  color: black;
-}
-.preview-section .karaoke-highlight-layer {
-  --karaoke-highlight-color: red;
-  --karaoke-highlight-bg-color: yellow;
-  --karaoke-highlight-blend-mode: multiply;
+  mix-blend-mode: var(--karaoke-highlight-blend-mode, normal);
 }

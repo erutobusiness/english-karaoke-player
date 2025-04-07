@@ -121,7 +121,7 @@ const EnglishKaraokePlayer = () => {
           className={`karaoke-button ${isContinuousPlay ? 'active' : ''}`}
           onClick={toggleContinuousPlay}
         >
-          {isContinuousPlay ? "全文再生中" : "一文再生"}
+          {isContinuousPlay ? "全文" : "一文"}
         </button>
         <button
           type="button"
