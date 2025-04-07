@@ -1,15 +1,23 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import type { WordInfo } from '../components/EnglishKaraokePlayer/data';
+// コールバックに渡すアクションの型
+interface KaraokeActions {
+  play: () => void;
+  reset: () => void;
+}
 
 interface UseKaraokePlayerProps {
   audioUrl: string;
   words: WordInfo[];
-  onEnded?: () => void;
+  onEnded?: () => void; // 単一再生終了時 or 全文再生の最終行終了時
+  onNextLine?: (actions: KaraokeActions) => void; // 引数を受け取るように変更
 }
+// 余分な括弧を削除
 
-export const useKaraokePlayer = ({ audioUrl, onEnded }: UseKaraokePlayerProps) => {
+export const useKaraokePlayer = ({ audioUrl, onEnded, onNextLine }: UseKaraokePlayerProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
+  const [isContinuousPlay, setIsContinuousPlay] = useState(false); // 全文再生フラグ
   const audioRef = useRef<HTMLAudioElement>(null);
   const animationFrameRef = useRef<number | null>(null);
 
@@ -60,13 +68,10 @@ export const useKaraokePlayer = ({ audioUrl, onEnded }: UseKaraokePlayerProps) =
     cancelAnimationFrameIfExists(); // アニメーションフレームをキャンセル
   }, [cancelAnimationFrameIfExists]); // isPlaying に依存
 
-  // オーディオ終了時の処理
-  const handleAudioEnd = useCallback(() => {
-    cancelAnimationFrameIfExists();
-    setIsPlaying(false);
-    setCurrentTime(0);
-    if (onEnded) { onEnded(); }
-  }, [onEnded, cancelAnimationFrameIfExists]); // cancelAnimationFrameIfExists を追加
+  // 全文再生モードを切り替える関数
+  const toggleContinuousPlay = useCallback(() => {
+    setIsContinuousPlay(prev => !prev);
+  }, []);
 
   // プレイヤーのリセット（外部から呼び出せるように）
   const reset = useCallback(() => {
@@ -78,6 +83,22 @@ export const useKaraokePlayer = ({ audioUrl, onEnded }: UseKaraokePlayerProps) =
     }
     cancelAnimationFrameIfExists();
   }, [cancelAnimationFrameIfExists]);
+
+  // オーディオ終了時の処理 (play, reset の後に定義)
+  const handleAudioEnd = useCallback(() => {
+    cancelAnimationFrameIfExists();
+    setIsPlaying(false);
+    setCurrentTime(0); // 時間をリセット
+
+    if (isContinuousPlay && onNextLine) {
+      // 全文再生が有効で、次の行へ進むコールバックがあれば実行
+      // play と reset を引数として渡す
+      onNextLine({ play, reset });
+    } else if (onEnded) {
+      // 全文再生が無効、または最後の行で onNextLine がない場合、通常の onEnded を実行
+      onEnded();
+    }
+  }, [isContinuousPlay, onNextLine, onEnded, cancelAnimationFrameIfExists, play, reset]);
 
   // audioUrl が変わった時に audio の src を更新
   useEffect(() => {
@@ -105,10 +126,12 @@ export const useKaraokePlayer = ({ audioUrl, onEnded }: UseKaraokePlayerProps) =
     audioRef,
     currentTime,
     isPlaying,
-    play,         // togglePlay の代わりに play を公開
-    pause,        // pause を公開
-    reset,    // 外部からリセットできるように公開
+    isContinuousPlay,
+    play,
+    pause,
+    reset,
+    toggleContinuousPlay,
     getPartialHighlight,
-    handleAudioEnd, // audio 要素の onEnded に渡すため公開
+    handleAudioEnd,
   };
 };
