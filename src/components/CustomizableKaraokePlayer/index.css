@@ -64,19 +64,17 @@ select {
   margin-top: 20px;
 }
 
-/* General button styling */
-button {
+.controls > button {
   padding: 10px 20px;
   font-size: 16px;
   cursor: pointer;
-  background-color: #4CAF50; /* Green background */
   color: white;
   border: none;
   border-radius: 4px;
   transition: background-color 0.3s ease;
 }
 
-button:hover {
+.controls > button:hover {
   background-color: #45a049; /* Darker green on hover */
 }
 
@@ -105,11 +103,3 @@ textarea {
   gap: 10px;
   margin-top: 10px; /* Added margin top */
 }
-
-/* Remove old styles */
-/*
-.word-container { ... }
-.word { ... }
-.highlight { ... }
-.original { ... }
-*/

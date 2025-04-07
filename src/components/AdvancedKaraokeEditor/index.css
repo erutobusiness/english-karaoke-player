@@ -57,12 +57,10 @@ textarea {
   margin-top: 10px;
 }
 
-/* General button styling */
-button, .button {
+.controls > .button {
   padding: 8px 16px;
   font-size: 14px;
   cursor: pointer;
-  background-color: #4CAF50; /* Green background */
   color: white;
   border: none;
   border-radius: 4px;
@@ -72,11 +70,11 @@ button, .button {
   text-decoration: none; /* For label styled as button */
 }
 
-button:hover, .button:hover {
+.controls > .button:hover {
   background-color: #45a049; /* Darker green on hover */
 }
 
-button:disabled {
+.controls > button:disabled {
   background-color: #ccc;
   cursor: not-allowed;
 }
@@ -85,7 +83,7 @@ button:disabled {
   display: flex;
   gap: 10px;
   margin-bottom: 15px;
-  flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+  flex-wrap: wrap;
 }
 
 .timeline-container {
