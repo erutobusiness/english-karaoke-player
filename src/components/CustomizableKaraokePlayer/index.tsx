@@ -3,12 +3,10 @@ import { useState, useRef, useEffect } from 'react';
 import './index.css'; // Import the CSS file
 import { useKaraokePlayer, type WordInfo } from '../../hooks/useKaraokePlayer';
 
-// Word 型は WordInfo を使うので削除
-
 interface Sample {
   id: number;
   text: string;
-  words: WordInfo[]; // WordInfo 型を使用
+  words: WordInfo[];
   audioUrl: string;
 }
 
@@ -214,7 +212,6 @@ const CustomizableKaraokePlayer = () => {
             className="text-container"
             onClick={togglePlay} // フックから取得した togglePlay を使用
             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') togglePlay(); }} // フックから取得した togglePlay を使用
-            // role="button" and tabIndex={0} are removed as they are implicit for <button>
           >
             {selectedSample?.words?.map((word, index) => ( // selectedSample が null の可能性を考慮
               <span key={`${selectedSample.id}-${index}`} className="word-container"> {/* Use more stable key */}

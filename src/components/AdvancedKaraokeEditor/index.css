@@ -5,10 +5,6 @@
   font-family: Arial, sans-serif;
 }
 
-h2, h3, h4 {
-  color: #333;
-}
-
 .audio-section, .text-section, .edit-section, .preview-section {
   margin-bottom: 20px;
   padding: 15px;
@@ -227,9 +223,9 @@ button:disabled {
   color: #666;
 }
 
-/* Preview Mode Styles */
+/* Preview Mode Styles using common karaoke classes */
 .preview-section .text-container {
-  font-size: 24px; /* Larger font size for preview */
+  font-size: 24px;
   line-height: 1.5;
   padding: 20px;
   border: 1px solid #ddd;
@@ -238,38 +234,20 @@ button:disabled {
   cursor: pointer;
   margin: 20px 0;
   min-height: 100px;
-  display: flex; /* Use flexbox for better alignment */
-  flex-wrap: wrap; /* Allow words to wrap */
-  align-items: baseline; /* Align words based on their baseline */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
 }
 
-.word-container {
-  display: inline-block; /* Ensure space is handled correctly */
-  position: relative; /* Needed for highlight positioning */
-  margin: 0 2px; /* Small space between words */
+.preview-section .karaoke-word-container {
+  /* Inherits display, position, vertical-align from common styles */
+  margin: 0 2px; /* Specific margin for editor preview */
 }
 
-.word {
-  position: relative;
-  display: inline-block;
-}
-
-.highlight {
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
-  background-color: yellow; /* Standard highlight color */
-  overflow: hidden;
-  white-space: nowrap;
-  color: red; /* Make highlighted text red */
-  pointer-events: none; /* Allow clicks to pass through */
-  mix-blend-mode: multiply; /* Blend mode for better visibility */
-  z-index: 1; /* Ensure highlight is above original */
-}
-
-.original {
-  color: black; /* Original text color */
-  position: relative;
-  /* z-index: -1; Removed as highlight is now above */
+.preview-section .karaoke-highlight-layer {
+  /* Inherits position, top, left, height, overflow, white-space, pointer-events, z-index from common styles */
+  /* Override CSS variables for editor preview */
+  --karaoke-highlight-color: red;
+  --karaoke-highlight-bg-color: yellow;
+  --karaoke-highlight-blend-mode: multiply;
 }

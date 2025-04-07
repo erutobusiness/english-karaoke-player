@@ -17,19 +17,17 @@ const AdvancedKaraokeEditor = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const timelineRef = useRef<HTMLButtonElement | null>(null);
 
-  // useKaraokePlayer フックを使用
   const {
-    audioRef,          // フックから取得
-    isPlaying,         // フックから取得
-    currentTime,       // フックから取得
-    togglePlay,        // フックから取得
-    getPartialHighlight, // フックから取得
-    handleAudioEnd: hookHandleAudioEnd, // フックの onEnded ハンドラ
-    resetPlayer,       // フックのリセット関数
+    audioRef,
+    isPlaying,
+    currentTime,
+    togglePlay,
+    getPartialHighlight,
+    handleAudioEnd: hookHandleAudioEnd,
+    resetPlayer,
   } = useKaraokePlayer({
     audioUrl: audioUrl,
     words: words,
-    // エディタでは曲が終わっても特別なことはしないので onEnded は空でも良い
     onEnded: () => { console.log("Track ended in editor"); }
   });
 
@@ -41,7 +39,7 @@ const AdvancedKaraokeEditor = () => {
     const url = URL.createObjectURL(file);
     const previousAudioUrl = audioUrl; // クリーンアップ用に保持
 
-    setAudioUrl(url); // これによりフック内の useEffect がトリガーされる
+    setAudioUrl(url);
 
     // 既存の Blob URL をクリーンアップ
     if (previousAudioUrl?.startsWith('blob:')) {
@@ -52,7 +50,6 @@ const AdvancedKaraokeEditor = () => {
     const audio = new Audio(url);
     audio.addEventListener('loadedmetadata', () => {
       setAudioDuration(audio.duration);
-      // audioUrl 変更時にフック内でリセットされるため、ここでの resetPlayer 呼び出しは不要
     });
   };
 
@@ -80,19 +77,13 @@ const AdvancedKaraokeEditor = () => {
     setIsEditingText(false);
   };
 
-  // 以下のロジックは useKaraokePlayer フックに移動しました
-  // - togglePlay (フックから取得)
-  // - startTimeTracking
-  // - handleAudioEnd (フックから取得)
-
   // 単語選択時の処理
   const selectWord = (index: number) => {
     setSelectedWordIndex(index);
 
     // 選択した単語の開始時間に移動
     if (audioRef.current && index >= 0 && index < words.length) {
-      audioRef.current.currentTime = words[index].start; // フックから取得した audioRef を使用
-      // setCurrentTime の呼び出しは削除済み
+      audioRef.current.currentTime = words[index].start;
     }
   };
 
@@ -134,12 +125,11 @@ const AdvancedKaraokeEditor = () => {
       }
     }
 
-    // Recalculate current word's duration based on the next word's start time
     if (selectedWordIndex < words.length - 1) {
-      const currentWordForDuration = newWords[selectedWordIndex]; // Re-fetch potentially updated word
+      const currentWordForDuration = newWords[selectedWordIndex];
       const nextWordForDuration = newWords[selectedWordIndex + 1];
       if (currentWordForDuration && nextWordForDuration) {
-          currentWordForDuration.duration = Math.max(0.1, nextWordForDuration.start - currentWordForDuration.start); // Ensure minimum duration
+          currentWordForDuration.duration = Math.max(0.1, nextWordForDuration.start - currentWordForDuration.start);
       }
     } else {
         // For the last word, duration goes until the end of the audio
@@ -203,8 +193,7 @@ const AdvancedKaraokeEditor = () => {
     const newTime = percentage * audioDuration;
 
     audioRef.current.currentTime = newTime;
-    // setCurrentTime の呼び出しは不要 (フックが更新するため)
-  }, [audioDuration, audioRef]); // audioRef を依存配列に追加
+  }, [audioDuration, audioRef]);
 
   // タイムライン上の単語位置を計算
   const getWordPosition = (word: WordInfo) => {
@@ -364,21 +353,21 @@ const AdvancedKaraokeEditor = () => {
               <button
                 type="button"
                 className="text-container"
-                onClick={togglePlay} // コメント削除
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') togglePlay(); }} // コメント削除
+                onClick={togglePlay}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') togglePlay(); }}
               >
                 {words.map((word: WordInfo, index: number) => (
-                  <span key={`${word.word}-${index}`} className="word-container">
-                    <span className="word">
+                  <span key={`${word.word}-${index}`} className="karaoke-word-container">
+                    <span className="karaoke-word">
                       <span
-                        className="highlight"
+                        className="karaoke-highlight-layer"
                         style={{
                           width: `${getPartialHighlight(word)}%`
                         }}
                       >
                         {word.word}
                       </span>
-                      <span className="original">
+                      <span className="karaoke-original-text">
                         {word.word}
                       </span>
                     </span>
@@ -490,7 +479,6 @@ const AdvancedKaraokeEditor = () => {
                       className={`word-item ${selectedWordIndex === index ? 'selected' : ''}`}
                       onClick={() => selectWord(index)}
                       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') selectWord(index); }}
-                      // role="button" and tabIndex={0} removed
                     >
                       <div className="word-text">{word.word}</div>
                       <div className="word-time">
@@ -502,19 +490,13 @@ const AdvancedKaraokeEditor = () => {
               </div> {/* words-list */}
             </div> /* End of edit-section */
           )
-        // </> // 不要な Fragment を削除
       )}
 
-      {/* audio 要素はフック内で管理されるため、ここではレンダリングしない */}
-      {/* ただし、フックが内部で audio 要素をレンダリング・管理するため、 */}
-      {/* ここで明示的にレンダリングする必要はない。 */}
-      {/* Biome の警告を避けるため、非表示の audio 要素をレンダリングし、ref とハンドラを渡す */}
       <audio ref={audioRef} src={audioUrl} onEnded={hookHandleAudioEnd} style={{ display: 'none' }}>
-         {/* biome-ignore lint/a11y/useMediaCaption: Captions not needed for this hidden element */}
          <track kind="captions" />
       </audio>
-    </div> /* End of karaoke-editor div */
-  ); /* End of return statement */
-}; /* End of AdvancedKaraokeEditor component */
+    </div>
+  );
+};
 
 export default AdvancedKaraokeEditor;

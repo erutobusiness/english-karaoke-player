@@ -12,36 +12,6 @@
   cursor: pointer;
 }
 
-.word-container {
-  display: inline-block;
-  position: relative;
-  margin-right: 0.2em; /* Add space between words */
-}
-
-.word {
-  position: relative;
-  display: inline-block;
-}
-
-.highlight {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  overflow: hidden;
-  color: red;
-  white-space: nowrap;
-  pointer-events: none;
-  z-index: 1; /* Ensure original text is clickable if needed, though highlight covers it */
-}
-
-.original {
-  color: black; /* Ensure original text is visible */
-  /* opacity: 0.5; */ /* Optional: Make original slightly transparent */
-  position: relative; /* Ensure it's positioned correctly relative to highlight */
-  z-index: 0; /* Ensure original text is clickable if needed, though highlight covers it */
-}
-
 .controls {
   margin-top: 20px;
 }

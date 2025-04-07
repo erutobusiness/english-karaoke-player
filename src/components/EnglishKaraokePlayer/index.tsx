@@ -37,24 +37,23 @@ const EnglishKaraokePlayer = () => {
     <div className="karaoke-player">
       <div
         className="text-container"
-        onClick={togglePlay} // フックから取得した togglePlay を使用
-        // biome-ignore lint: Using div with button role for text container clickability
-        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') togglePlay(); }} // フックから取得した togglePlay を使用
+        onClick={togglePlay}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') togglePlay(); }}
         role="button"
         tabIndex={0}
       >
         {currentKaraokeText.words.map((word, index) => (
-          <span key={`${currentKaraokeText.audioUrl}-${word.start}-${index}`} className="word-container"> {/* key に audioUrl を追加して一意性を高める */}
-            <span className="word">
+          <span key={`${currentKaraokeText.audioUrl}-${word.start}-${index}`} className="karaoke-word-container">
+            <span className="karaoke-word">
+              <span className="karaoke-original-text">
+                {word.word}
+              </span>
               <span
-                className="highlight"
+                className="karaoke-highlight-layer"
                 style={{
                   width: `${getPartialHighlight(word)}%`
                 }}
               >
-                {word.word}
-              </span>
-              <span className="original">
                 {word.word}
               </span>
             </span>
