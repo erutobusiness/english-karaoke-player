@@ -35,29 +35,6 @@ select {
   background-color: #fff; /* Added background */
 }
 
-/* Use common karaoke styles and add component-specific overrides */
-.karaoke-word-container {
-  /* Inherits display, position, vertical-align from common styles */
-  margin: 0 2px; /* Specific margin for this player */
-}
-
-.karaoke-word {
-  /* Inherits position, display, white-space from common styles */
-}
-
-.karaoke-original-text {
-  /* Inherits position, z-index from common styles */
-  color: black; /* Specific text color for this player */
-}
-
-.karaoke-highlight-layer {
-  /* Inherits position, top, left, height, overflow, white-space, pointer-events, z-index from common styles */
-  /* Override CSS variables for this player (similar to AdvancedKaraokeEditor preview) */
-  --karaoke-highlight-color: red;
-  --karaoke-highlight-bg-color: yellow;
-  --karaoke-highlight-blend-mode: multiply;
-}
-
 .controls {
   display: flex;
   gap: 10px;
