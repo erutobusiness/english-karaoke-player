@@ -15,7 +15,7 @@ interface UseKaraokePlayerProps {
   onEnded?: () => void; // オプショナルな onEnded コールバック
 }
 
-export const useKaraokePlayer = ({ audioUrl, words, onEnded }: UseKaraokePlayerProps) => {
+export const useKaraokePlayer = ({ audioUrl, onEnded }: UseKaraokePlayerProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const audioRef = useRef<HTMLAudioElement>(null);

@@ -214,10 +214,10 @@ const CustomizableKaraokePlayer = () => {
             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') togglePlay(); }}
           >
             {selectedSample?.words?.map((word, index) => ( // selectedSample が null の可能性を考慮
-              <span key={`${selectedSample.id}-${index}`} className="word-container"> {/* Use more stable key */}
-                <span className="word">
+              <span key={`${selectedSample.id}-${index}`} className="karaoke-word-container">
+                <span className="karaoke-word">
                   <span
-                    className="highlight"
+                    className="karaoke-highlight-layer"
                     style={{
                       // フックから取得した getPartialHighlight を使用
                       width: `${getPartialHighlight(word)}%`
@@ -225,7 +225,7 @@ const CustomizableKaraokePlayer = () => {
                   >
                     {word.word}
                   </span>
-                  <span className="original">
+                  <span className="karaoke-original-text">
                     {word.word}
                   </span>
                 </span>
