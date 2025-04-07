@@ -210,8 +210,8 @@ const CustomizableKaraokePlayer = () => {
           <button
             type="button" // Add type="button"
             className="text-container"
-            onClick={togglePlay} // フックから取得した togglePlay を使用
-            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') togglePlay(); }} // フックから取得した togglePlay を使用
+            onClick={togglePlay}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') togglePlay(); }}
           >
             {selectedSample?.words?.map((word, index) => ( // selectedSample が null の可能性を考慮
               <span key={`${selectedSample.id}-${index}`} className="word-container"> {/* Use more stable key */}
@@ -236,8 +236,8 @@ const CustomizableKaraokePlayer = () => {
           </button>
 
           <div className="controls">
-            <button type="button" onClick={togglePlay}> {/* フックから取得した togglePlay を使用 */}
-              {isPlaying ? "停止" : "再生"} {/* フックから取得した isPlaying を使用 */}
+            <button type="button" onClick={togglePlay}>
+              {isPlaying ? "停止" : "再生"}
             </button>
             <input
               type="file"

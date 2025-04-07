@@ -18,12 +18,12 @@ export const sampleText: KaraokeText = {
     { word: "I", start: 0, duration: 0.2 },
     { word: "know", start: 0.2, duration: 0.4 },
     { word: "that", start: 0.6, duration: 0.3 },
-    { word: "Tom", start: 0.9, duration: 0.4 },
-    { word: "would", start: 1.3, duration: 0.4 },
-    { word: "never", start: 1.7, duration: 0.5 },
-    { word: "lie", start: 2.2, duration: 0.4 },
-    { word: "to", start: 2.6, duration: 0.2 },
-    { word: "Mary.", start: 2.8, duration: 0.5 }
+    { word: "Tom", start: 0.9, duration: 0.3 },
+    { word: "would", start: 1.2, duration: 0.1 },
+    { word: "never", start: 1.3, duration: 0.4 },
+    { word: "lie", start: 1.7, duration: 0.4 },
+    { word: "to", start: 2.1, duration: 0.1 },
+    { word: "Mary.", start: 2.2, duration: 0.5 }
   ],
   audioUrl: "https://audio.tatoeba.org/sentences/eng/7170951.mp3" // オーディオファイルのパス
 };

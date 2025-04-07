@@ -1,7 +1,7 @@
-import { useState, useCallback } from 'react'; // useRef, useEffect は不要に
-import './index.css'; // 作成した CSS ファイルをインポート
-import { sampleText, type KaraokeText } from './data'; // WordInfo はフックからインポート
-import { useKaraokePlayer, type WordInfo } from '../../hooks/useKaraokePlayer'; // フックと WordInfo をインポート
+import { useState, useCallback } from 'react';
+import './index.css';
+import { sampleText, type KaraokeText } from './data';
+import { useKaraokePlayer } from '../../hooks/useKaraokePlayer';
 
 // 複数のカラオケデータを配列で管理
 const karaokeData: KaraokeText[] = Array(5).fill(sampleText);
@@ -18,29 +18,26 @@ const EnglishKaraokePlayer = () => {
       }
       return 0; // 最後まで行ったら最初に戻る
     });
-  }, []); // karaokeData.length は不変なので依存配列は空
+  }, []);
 
-  // useKaraokePlayer フックを使用
   const {
     audioRef,
     isPlaying,
     togglePlay,
     getPartialHighlight,
-    handleAudioEnd, // フックが提供する onEnded ハンドラ (audio 要素に渡す)
+    handleAudioEnd,
   } = useKaraokePlayer({
     audioUrl: currentKaraokeText.audioUrl,
     words: currentKaraokeText.words,
-    onEnded: handleTrackEnd, // 曲が終わったら handleTrackEnd を実行
+    onEnded: handleTrackEnd,
   });
 
   return (
     <div className="karaoke-player">
-      <div
+      <button
+        type="button"
         className="text-container"
         onClick={togglePlay}
-        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') togglePlay(); }}
-        role="button"
-        tabIndex={0}
       >
         {currentKaraokeText.words.map((word, index) => (
           <span key={`${currentKaraokeText.audioUrl}-${word.start}-${index}`} className="karaoke-word-container">
@@ -60,7 +57,7 @@ const EnglishKaraokePlayer = () => {
             {index < currentKaraokeText.words.length - 1 && " "}
           </span>
         ))}
-      </div>
+      </button>
 
       <div className="controls">
         <button type="button" onClick={togglePlay}>
