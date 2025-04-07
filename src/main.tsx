@@ -5,8 +5,9 @@ import './index.css'
 
 const rootElement = document.getElementById('root')
 
+// root要素が見つからない場合のエラー処理
 if (!rootElement) {
-  throw new Error("Failed to find the root element") // root要素が見つからない場合のエラー処理
+  throw new Error("Failed to find the root element")
 }
 
 ReactDOM.createRoot(rootElement).render(
