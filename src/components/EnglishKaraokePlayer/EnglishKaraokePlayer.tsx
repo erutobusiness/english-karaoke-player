@@ -15,30 +15,25 @@ const EnglishKaraokePlayer = () => {
   const activeAudioUrl = activeKaraokeData?.audioUrl ?? '';
   const activeWords = activeKaraokeData?.words ?? [];
 
-  // handleNextLine を useKaraokePlayer 呼び出し前に定義
-  // 引数 actions を受け取り、内部で actions.play/actions.reset を使用
   const handleNextLine = useCallback((actions: KaraokeActions) => {
     const nextIndex = activeItemIndex + 1;
     if (nextIndex < karaokeData.length) {
       setActiveItemIndex(nextIndex);
-      // 引数で渡された actions.play を使用
       setTimeout(() => { actions.play(); }, 100);
     } else {
-      // 引数で渡された actions.reset を使用
       actions.reset();
     }
-    // 依存配列は activeItemIndex のみでOK
   }, [activeItemIndex]);
 
-  // useKaraokePlayer フックを呼び出し、関数を取得
   // onNextLine に直接 handleNextLine を渡す
   const {
     audioRef,
     isPlaying,
+    currentTime, // currentTime を追加
     isContinuousPlay,
-    play, // 他のハンドラで使うため取得
-    pause, // 他のハンドラで使うため取得
-    reset, // 他のハンドラで使うため取得
+    play,
+    pause,
+    reset,
     toggleContinuousPlay,
     getPartialHighlight,
     handleAudioEnd,
@@ -46,10 +41,7 @@ const EnglishKaraokePlayer = () => {
     audioUrl: activeAudioUrl,
     words: activeWords,
     onNextLine: handleNextLine, // 修正したハンドラを渡す
-    onEnded: () => { /* 必要であれば単一再生終了時の処理 */ },
   });
-
-  // useRef と useEffect を削除
 
   // クリックハンドラ (依存配列は変更なし、play/reset はフックから取得した安定したもの)
   const handleActivate = useCallback((index: number) => {
@@ -127,6 +119,7 @@ const EnglishKaraokePlayer = () => {
           type="button"
           className="karaoke-button"
           onClick={handleStop}
+          disabled={!isPlaying && currentTime === 0} // isPlaying が false かつ currentTime が 0 の場合のみ無効
         >
           停止
         </button>

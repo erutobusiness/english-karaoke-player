@@ -21,29 +21,29 @@ export const useKaraokePlayer = ({ audioUrl, onEnded, onNextLine }: UseKaraokePl
   const audioRef = useRef<HTMLAudioElement>(null);
   const animationFrameRef = useRef<number | null>(null);
 
-  // 時間追跡のアニメーションフレーム
-  const startTimeTracking = useCallback(() => {
-    const updateTime = () => {
-      if (audioRef.current) {
-        setCurrentTime(audioRef.current.currentTime ?? 0);
-        // isPlaying が true の間だけ次のフレームを要求 (より安全なチェック)
-        if (audioRef.current && !audioRef.current.paused && !audioRef.current.ended) {
-           animationFrameRef.current = requestAnimationFrame(updateTime);
-        } else {
-           cancelAnimationFrameIfExists(); // 停止または終了したらキャンセル
-        }
-      }
-    };
-    cancelAnimationFrameIfExists(); // 開始前に既存のフレームをキャンセル
-    animationFrameRef.current = requestAnimationFrame(updateTime);
-  }, []); // 依存配列は空
-
   const cancelAnimationFrameIfExists = useCallback(() => {
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
       animationFrameRef.current = null;
     }
-  }, []); // 依存配列は空でOK、ref の current へのアクセスは依存関係にならない
+  }, []);
+
+  // 時間追跡のアニメーションフレーム
+  const startTimeTracking = useCallback(() => {
+    const updateTime = () => {
+      if (audioRef.current) {
+        const newTime = audioRef.current.currentTime ?? 0;
+        setCurrentTime(newTime);
+        if (audioRef.current && !audioRef.current.paused && !audioRef.current.ended) {
+           animationFrameRef.current = requestAnimationFrame(updateTime);
+        } else {
+           cancelAnimationFrameIfExists();
+        }
+      }
+    };
+    cancelAnimationFrameIfExists(); // 開始前に既存のフレームをキャンセル
+    animationFrameRef.current = requestAnimationFrame(updateTime);
+  }, [cancelAnimationFrameIfExists]);
 
   // 再生を開始する関数
   const play = useCallback(() => {
@@ -55,7 +55,10 @@ export const useKaraokePlayer = ({ audioUrl, onEnded, onNextLine }: UseKaraokePl
     setTimeout(() => {
       if (!audioRef.current) return;
       audioRef.current.play().then(() => {
-        startTimeTracking(); // 再生成功したら時間追跡開始
+        startTimeTracking();
+      }).catch(error => {
+        console.error("[useKaraokePlayer] play (setTimeout): Error playing audio", error); // エラーログ追加
+        setIsPlaying(false); // エラー時は再生状態をリセット
       });
     }, 0);
   }, [startTimeTracking]);
@@ -65,8 +68,8 @@ export const useKaraokePlayer = ({ audioUrl, onEnded, onNextLine }: UseKaraokePl
     if (!audioRef.current) return;
     setIsPlaying(false);
     audioRef.current.pause();
-    cancelAnimationFrameIfExists(); // アニメーションフレームをキャンセル
-  }, [cancelAnimationFrameIfExists]); // isPlaying に依存
+    cancelAnimationFrameIfExists();
+  }, [cancelAnimationFrameIfExists]); // isPlaying を依存配列に追加
 
   // 全文再生モードを切り替える関数
   const toggleContinuousPlay = useCallback(() => {
@@ -82,35 +85,30 @@ export const useKaraokePlayer = ({ audioUrl, onEnded, onNextLine }: UseKaraokePl
         setCurrentTime(0);
     }
     cancelAnimationFrameIfExists();
-  }, [cancelAnimationFrameIfExists]);
+  }, [cancelAnimationFrameIfExists]); // isPlaying, currentTime を依存配列に追加
 
   // オーディオ終了時の処理 (play, reset の後に定義)
   const handleAudioEnd = useCallback(() => {
     cancelAnimationFrameIfExists();
-    setIsPlaying(false);
+    if (!isContinuousPlay) { // 全文再生中でなければ false にする
+      setIsPlaying(false);
+    }
     setCurrentTime(0); // 時間をリセット
 
     if (isContinuousPlay && onNextLine) {
-      // 全文再生が有効で、次の行へ進むコールバックがあれば実行
-      // play と reset を引数として渡す
       onNextLine({ play, reset });
     } else if (onEnded) {
-      // 全文再生が無効、または最後の行で onNextLine がない場合、通常の onEnded を実行
       onEnded();
     }
-  }, [isContinuousPlay, onNextLine, onEnded, cancelAnimationFrameIfExists, play, reset]);
+  }, [isContinuousPlay, onNextLine, onEnded, cancelAnimationFrameIfExists, play, reset]); // 依存配列は変更なし
 
   // audioUrl が変わった時に audio の src を更新
   useEffect(() => {
     if (audioRef.current) {
-      // resetPlayer() を直接呼ばずに、必要な状態リセットを行う
       audioRef.current.src = audioUrl;
-      audioRef.current.load(); // 新しいソースをロード
-      setCurrentTime(0);       // 時間をリセット
-      setIsPlaying(false);     // 再生状態を停止にリセット
-      cancelAnimationFrameIfExists(); // アニメーションフレームもキャンセル
+      audioRef.current.load();
     }
-  }, [audioUrl, cancelAnimationFrameIfExists]);
+  }, [audioUrl]);
 
   // 単語の進行度に基づいた部分ハイライト
   const getPartialHighlight = useCallback((word: WordInfo): number => {
