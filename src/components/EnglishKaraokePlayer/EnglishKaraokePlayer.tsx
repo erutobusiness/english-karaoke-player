@@ -1,6 +1,7 @@
-import { useState, useCallback } from 'react'; // useRef, useEffect を削除
+import { useState, useCallback, useRef } from 'react';
 import { karaokeData } from './data';
 import { useKaraokePlayer } from '../../hooks/useKaraokePlayer';
+import Wayaku from './Wayaku';
 
 // useKaraokePlayer から渡されるアクションの型を定義 (フック側と合わせる)
 interface KaraokeActions {
@@ -10,6 +11,8 @@ interface KaraokeActions {
 
 const EnglishKaraokePlayer = () => {
   const [activeItemIndex, setActiveItemIndex] = useState<number>(0);
+  // 英文全体のコンテナへのref
+  const englishContainerRef = useRef<HTMLDivElement>(null);
 
   const activeKaraokeData = karaokeData[activeItemIndex];
   const activeAudioUrl = activeKaraokeData?.audioUrl ?? '';
@@ -29,7 +32,7 @@ const EnglishKaraokePlayer = () => {
   const {
     audioRef,
     isPlaying,
-    currentTime, // currentTime を追加
+    currentTime,
     isContinuousPlay,
     play,
     pause,
@@ -40,18 +43,35 @@ const EnglishKaraokePlayer = () => {
   } = useKaraokePlayer({
     audioUrl: activeAudioUrl,
     words: activeWords,
-    onNextLine: handleNextLine, // 修正したハンドラを渡す
+    onNextLine: handleNextLine,
   });
 
-  // クリックハンドラ (依存配列は変更なし、play/reset はフックから取得した安定したもの)
-  const handleActivate = useCallback((index: number) => {
+  // 単語クリック/キーダウン時のハンドラ (イベントから sentenceIndex を取得)
+  const handleWordActivate = useCallback((event: React.MouseEvent<HTMLSpanElement> | React.KeyboardEvent<HTMLSpanElement>) => {
+    const target = event.currentTarget;
+    const sentenceIndexStr = target.dataset.sentenceIndex;
+    if (sentenceIndexStr === undefined) return;
+
+    const index = Number.parseInt(sentenceIndexStr, 10); // Use Number.parseInt
+    if (Number.isNaN(index)) return; // Use Number.isNaN
+
+    // 元の handleActivate のロジックを実行
     if (isContinuousPlay && isPlaying) return;
     reset();
     setActiveItemIndex(index);
     setTimeout(() => { play(); }, 100);
-  }, [isContinuousPlay, isPlaying, play, reset]);
+  }, [isContinuousPlay, isPlaying, play, reset]); // 依存関係は元の handleActivate と同じ
 
-  // 再生/停止トグルハンドラ (依存配列は変更なし)
+  // 単語のキーボード操作ハンドラ
+  const handleWordKeyDown = (event: React.KeyboardEvent<HTMLSpanElement>) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleWordActivate(event); // クリックと同じ処理を呼び出す
+    }
+  };
+
+
+  // 再生/停止トグルハンドラ
   const handleTogglePlay = useCallback(() => {
     if (isPlaying) {
       pause();
@@ -60,44 +80,57 @@ const EnglishKaraokePlayer = () => {
     }
   }, [isPlaying, play, pause]);
 
-  // 停止ハンドラ (依存配列は変更なし)
+  // 停止ハンドラ
   const handleStop = useCallback(() => {
     reset();
   }, [reset]);
 
   return (
     <div className="karaoke-container single-box-inline">
-      <div className="karaoke-text-display">
-        {karaokeData.map((item, itemIndex) => (
-          <button
-            type="button"
-            key={item.audioUrl}
-            className={`karaoke-sentence ${itemIndex === activeItemIndex ? 'active' : ''}`}
-            onClick={() => handleActivate(itemIndex)}
-            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleActivate(itemIndex); }}
-            style={{ background: 'none', border: 'none', padding: 0, margin: 0, textAlign: 'left', cursor: 'pointer' }}
-          >
-            {item.words.map((word) => (
-              <span key={`${item.audioUrl}-${word.start}`} className="karaoke-word-container">
-                <span className="karaoke-word">
-                  <span className="karaoke-original-text">
-                    {word.word}
-                  </span>
-                  <span
-                    className="karaoke-highlight-layer"
-                    style={{
-                      width: `${itemIndex === activeItemIndex ? getPartialHighlight(word) : 0}%`
-                    }}
-                  >
-                    {word.word}
-                  </span>
+      <div ref={englishContainerRef} className="karaoke-text-display">
+        {/* 英文表示エリア */}
+        <div className="english-texts-wrapper">
+          {/* flatMap を使用して全単語をフラットにレンダリング */}
+          {karaokeData.flatMap((item, itemIndex) => {
+            // Map words to their spans
+            const wordSpans = item.words.map((word) => (
+              <span
+                key={`${item.audioUrl}-${word.start}`}
+                className={`karaoke-word ${itemIndex === activeItemIndex ? 'active-sentence' : ''}`}
+                data-sentence-index={itemIndex}
+                tabIndex={-1}
+                onClick={handleWordActivate}
+                onKeyDown={handleWordKeyDown}
+                style={{ cursor: 'pointer' }}
+              >
+                <span className="karaoke-original-text">
+                  {word.word}
                 </span>
+                <span
+                  className="karaoke-highlight-layer"
+                  style={{
+                    width: `${itemIndex === activeItemIndex ? getPartialHighlight(word) : 0}%`
+                  }}
+                >
+                  {word.word}
+                </span>
+                {/* Add a space after each word */}
                 {' '}
               </span>
-            ))}
-             {itemIndex < karaokeData.length - 1 && <span style={{marginRight: '0.25em'}} />}
-          </button>
-        ))}
+            ));
+
+            // Add a space span after the sentence if it's not the last one
+            if (itemIndex < karaokeData.length - 1) {
+              return wordSpans.concat(<span key={`space-${itemIndex}`}>{' '}</span>);
+            }
+            // If it's the last sentence, just return the word spans
+            return wordSpans;
+          // End of flatMap callback
+          })}
+        </div>
+
+        {/* 和訳コンポーネント */}
+        <Wayaku karaokeData={karaokeData} containerRef={englishContainerRef} />
       </div>
 
       <div className="controls-container controls-bottom">
@@ -119,7 +152,7 @@ const EnglishKaraokePlayer = () => {
           type="button"
           className="karaoke-button"
           onClick={handleStop}
-          disabled={!isPlaying && currentTime === 0} // isPlaying が false かつ currentTime が 0 の場合のみ無効
+          disabled={!isPlaying && currentTime === 0}
         >
           停止
         </button>

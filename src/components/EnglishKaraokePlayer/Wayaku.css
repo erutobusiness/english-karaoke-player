@@ -1,0 +1,37 @@
+/* 和訳ブロック */
+.japanese-text-block {
+  font-size: 16px;
+  color: #555;
+  line-height: 1.5;
+  font-family: sans-serif;
+  pointer-events: none;
+  white-space: normal; /* 改行するように変更 */
+  display: block;
+  position: absolute;
+  margin-top: 0;
+  overflow: visible;
+  z-index: 1;
+  max-width: 95%; /* コンテナ幅に対して少し余白を残す */
+  word-wrap: break-word; /* 長い単語も折り返す */
+  padding-right: 20px; /* 右側に余白を追加 */
+}
+
+/* 和訳の測定用要素 */
+.wayaku-measure {
+  visibility: hidden;
+  position: absolute;
+  white-space: nowrap;
+  font-size: 16px;
+  font-family: sans-serif;
+  pointer-events: none;
+}
+
+/* 英文の測定用要素 */
+.english-measure {
+  visibility: hidden;
+  position: absolute;
+  white-space: nowrap;
+  font-size: 24px;
+  font-family: Arial, sans-serif;
+  pointer-events: none;
+}
