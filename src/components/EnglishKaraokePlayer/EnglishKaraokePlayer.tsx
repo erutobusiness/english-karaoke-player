@@ -10,6 +10,7 @@ interface KaraokeActions {
 
 const EnglishKaraokePlayer = () => {
   const [activeItemIndex, setActiveItemIndex] = useState<number>(0);
+  const [showWayaku, setShowWayaku] = useState<boolean>(true); // 和訳表示の状態を管理
   const englishContainerRef = useRef<HTMLDivElement>(null);
   const englishTextsWrapperRef = useRef<HTMLDivElement>(null);
 
@@ -87,6 +88,10 @@ const EnglishKaraokePlayer = () => {
     reset();
   }, [reset]);
 
+  const handleToggleWayaku = useCallback(() => {
+    setShowWayaku((prev) => !prev);
+  }, []);
+
   return (
     <div className="karaoke-container single-box-inline">
       <div ref={englishContainerRef} className="karaoke-text-display">
@@ -119,16 +124,18 @@ const EnglishKaraokePlayer = () => {
           ))}
         </div>
 
-        <Wayaku
-          karaokeData={karaokeData}
-          containerRef={englishContainerRef}
-          textsWrapperRef={englishTextsWrapperRef}
-        />
+        {showWayaku && (
+          <Wayaku
+            karaokeData={karaokeData}
+            containerRef={englishContainerRef}
+            textsWrapperRef={englishTextsWrapperRef}
+          />
+        )}
       </div>
 
       <div className="controls-container controls-bottom">
         <button type="button" className="karaoke-button" onClick={handleTogglePlay}>
-          {isPlaying ? "一時停止" : "再生"}
+          {isPlaying ? "停止" : "再生"}
         </button>
         <button
           type="button"
@@ -143,7 +150,14 @@ const EnglishKaraokePlayer = () => {
           onClick={handleStop}
           disabled={!isPlaying && currentTime === 0}
         >
-          停止
+          リセット
+        </button>
+        <button
+          type="button"
+          className={`karaoke-button ${showWayaku ? "active" : "inactive"}`}
+          onClick={handleToggleWayaku}
+        >
+          和訳
         </button>
       </div>
 

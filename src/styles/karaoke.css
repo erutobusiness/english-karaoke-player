@@ -56,6 +56,25 @@
   cursor: not-allowed;
 }
 
+/* アクティブ状態のボタン */
+.karaoke-button.active {
+  background-color: #4caf50;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+}
+
+/* 非アクティブ状態のボタン（通常色） */
+.karaoke-button.inactive {
+  background-color: #1a1a1a;
+  color: white;
+}
+/* ダークモードでは自動的に適用される */
+@media (prefers-color-scheme: light) {
+  .karaoke-button.inactive {
+    background-color: #e0e0e0;
+    color: #333;
+  }
+}
+
 /* カラオケ単語 */
 .karaoke-word {
   position: relative;
