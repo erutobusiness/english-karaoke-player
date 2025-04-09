@@ -101,7 +101,7 @@ const EnglishKaraokePlayer = () => {
     <div className="karaoke-container single-box-inline">
       <div
         ref={englishContainerRef}
-        className={`karaoke-text-display ${isShadowMode && "shadow-mode"}`}
+        className={`karaoke-text-display${isShadowMode ? " shadow-mode" : ""}`}
       >
         <div ref={englishTextsWrapperRef} className="english-texts-wrapper">
           {karaokeData.map((item, itemIndex) => (
