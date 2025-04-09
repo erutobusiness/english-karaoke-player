@@ -11,13 +11,21 @@ interface UseKaraokePlayerProps {
   words: WordInfo[];
   onEnded?: () => void; // 単一再生終了時 or 全文再生の最終行終了時
   onNextLine?: (actions: KaraokeActions) => void; // 引数を受け取るように変更
+  onWordChange?: (wordIndex: number) => void; // 現在の単語が変わったときのコールバック
 }
 // 余分な括弧を削除
 
-export const useKaraokePlayer = ({ audioUrl, onEnded, onNextLine }: UseKaraokePlayerProps) => {
+export const useKaraokePlayer = ({
+  audioUrl,
+  words,
+  onEnded,
+  onNextLine,
+  onWordChange,
+}: UseKaraokePlayerProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [isContinuousPlay, setIsContinuousPlay] = useState(false); // 全文再生フラグ
+  const [currentWordIndex, setCurrentWordIndex] = useState(0); // 現在の単語インデックス
   const audioRef = useRef<HTMLAudioElement>(null);
   const animationFrameRef = useRef<number | null>(null);
 
@@ -125,6 +133,35 @@ export const useKaraokePlayer = ({ audioUrl, onEnded, onNextLine }: UseKaraokePl
     },
     [currentTime]
   ); // currentTime に依存
+
+  // 現在の時間に基づいて、アクティブな単語を特定する
+  useEffect(() => {
+    if (!words || words.length === 0) return;
+
+    let newWordIndex = -1;
+    for (let i = 0; i < words.length; i++) {
+      if (
+        currentTime >= words[i].start &&
+        (currentTime < words[i].start + words[i].duration || i === words.length - 1)
+      ) {
+        newWordIndex = i;
+        break;
+      }
+    }
+
+    // words[0].startよりも前の時間の場合は最初の単語をアクティブにする
+    if (newWordIndex === -1 && currentTime < words[0].start) {
+      newWordIndex = 0;
+    }
+
+    // 単語インデックスが変わった場合のみ更新
+    if (newWordIndex !== -1 && newWordIndex !== currentWordIndex) {
+      setCurrentWordIndex(newWordIndex);
+      if (onWordChange) {
+        onWordChange(newWordIndex);
+      }
+    }
+  }, [currentTime, words, currentWordIndex, onWordChange]);
 
   return {
     audioRef,

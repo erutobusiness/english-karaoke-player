@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useRef } from "react";
 import { useKaraokePlayer } from "../../hooks/useKaraokePlayer";
+import { useAutoScroll } from "../../hooks/useAutoScroll";
 import Wayaku from "./Wayaku";
 import { karaokeData } from "./data";
 
@@ -10,20 +11,26 @@ interface KaraokeActions {
 
 const EnglishKaraokePlayer = () => {
   const [activeItemIndex, setActiveItemIndex] = useState<number>(0);
+  const [activeWordIndex, setActiveWordIndex] = useState<number>(0); // アクティブな単語のインデックス
   const [showWayaku, setShowWayaku] = useState<boolean>(true); // 和訳表示の状態を管理
   const [isShadowMode, setIsShadowMode] = useState<boolean>(false); // シャドーモードの状態を管理
   const englishContainerRef = useRef<HTMLDivElement>(null);
   const englishTextsWrapperRef = useRef<HTMLDivElement>(null);
+  const activeWordRef = useRef<HTMLSpanElement | null>(null); // アクティブな単語への参照
 
   const activeKaraokeData = karaokeData[activeItemIndex];
   const activeAudioUrl = activeKaraokeData?.audioUrl ?? "";
   const activeWords = activeKaraokeData?.words ?? [];
+
+  // 単語が表示範囲外の場合に自動スクロールするカスタムフックを使用
+  useAutoScroll(activeWordRef, englishContainerRef, [activeItemIndex, activeWordIndex]);
 
   const handleNextLine = useCallback(
     (actions: KaraokeActions) => {
       const nextIndex = activeItemIndex + 1;
       if (nextIndex < karaokeData.length) {
         setActiveItemIndex(nextIndex);
+        setActiveWordIndex(0); // 次の行に移動したら単語インデックスをリセット
         setTimeout(() => {
           actions.play();
         }, 100);
@@ -49,19 +56,23 @@ const EnglishKaraokePlayer = () => {
     audioUrl: activeAudioUrl,
     words: activeWords,
     onNextLine: handleNextLine,
+    onWordChange: setActiveWordIndex, // 単語インデックスを更新するコールバック
   });
 
   const handleWordActivate = useCallback(
     (event: React.MouseEvent<HTMLSpanElement> | React.KeyboardEvent<HTMLSpanElement>) => {
       const target = event.currentTarget;
       const sentenceIndexStr = target.dataset.sentenceIndex;
-      if (sentenceIndexStr === undefined) return;
+      const wordIndexStr = target.dataset.wordIndex;
+      if (sentenceIndexStr === undefined || wordIndexStr === undefined) return;
 
-      const index = Number.parseInt(sentenceIndexStr, 10);
-      if (Number.isNaN(index)) return;
+      const sentenceIndex = Number.parseInt(sentenceIndexStr, 10);
+      const wordIndex = Number.parseInt(wordIndexStr, 10);
+      if (Number.isNaN(sentenceIndex) || Number.isNaN(wordIndex)) return;
 
       reset();
-      setActiveItemIndex(index);
+      setActiveItemIndex(sentenceIndex);
+      setActiveWordIndex(wordIndex);
       setTimeout(() => {
         play();
       }, 100);
@@ -106,14 +117,24 @@ const EnglishKaraokePlayer = () => {
         <div ref={englishTextsWrapperRef} className="english-texts-wrapper">
           {karaokeData.map((item, itemIndex) => (
             <React.Fragment key={`sentence-${item.audioUrl}-${itemIndex}`}>
-              {item.words.map((word) => (
+              {item.words.map((word, wordIndex) => (
                 <span
                   key={`${item.audioUrl}-${word.start}`}
-                  className={`karaoke-word ${itemIndex === activeItemIndex ? "active-sentence" : ""}`}
+                  className={`karaoke-word ${
+                    itemIndex === activeItemIndex && wordIndex === activeWordIndex
+                      ? "active-word"
+                      : ""
+                  }`}
                   data-sentence-index={itemIndex}
+                  data-word-index={wordIndex}
                   tabIndex={-1}
                   onClick={handleWordActivate}
                   onKeyDown={handleWordKeyDown}
+                  ref={
+                    itemIndex === activeItemIndex && wordIndex === activeWordIndex
+                      ? activeWordRef
+                      : null
+                  } // アクティブな単語にrefを設定
                 >
                   <span className="karaoke-original-text">{word.word}</span>
                   <span
