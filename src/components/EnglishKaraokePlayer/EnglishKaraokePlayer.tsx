@@ -1,7 +1,7 @@
-import React, { useState, useCallback, useRef } from 'react';
-import { karaokeData } from './data';
-import { useKaraokePlayer } from '../../hooks/useKaraokePlayer';
-import Wayaku from './Wayaku';
+import React, { useState, useCallback, useRef } from "react";
+import { useKaraokePlayer } from "../../hooks/useKaraokePlayer";
+import Wayaku from "./Wayaku";
+import { karaokeData } from "./data";
 
 interface KaraokeActions {
   play: () => void;
@@ -14,18 +14,23 @@ const EnglishKaraokePlayer = () => {
   const englishTextsWrapperRef = useRef<HTMLDivElement>(null);
 
   const activeKaraokeData = karaokeData[activeItemIndex];
-  const activeAudioUrl = activeKaraokeData?.audioUrl ?? '';
+  const activeAudioUrl = activeKaraokeData?.audioUrl ?? "";
   const activeWords = activeKaraokeData?.words ?? [];
 
-  const handleNextLine = useCallback((actions: KaraokeActions) => {
-    const nextIndex = activeItemIndex + 1;
-    if (nextIndex < karaokeData.length) {
-      setActiveItemIndex(nextIndex);
-      setTimeout(() => { actions.play(); }, 100);
-    } else {
-      actions.reset();
-    }
-  }, [activeItemIndex]);
+  const handleNextLine = useCallback(
+    (actions: KaraokeActions) => {
+      const nextIndex = activeItemIndex + 1;
+      if (nextIndex < karaokeData.length) {
+        setActiveItemIndex(nextIndex);
+        setTimeout(() => {
+          actions.play();
+        }, 100);
+      } else {
+        actions.reset();
+      }
+    },
+    [activeItemIndex]
+  );
 
   const {
     audioRef,
@@ -44,22 +49,27 @@ const EnglishKaraokePlayer = () => {
     onNextLine: handleNextLine,
   });
 
-  const handleWordActivate = useCallback((event: React.MouseEvent<HTMLSpanElement> | React.KeyboardEvent<HTMLSpanElement>) => {
-    const target = event.currentTarget;
-    const sentenceIndexStr = target.dataset.sentenceIndex;
-    if (sentenceIndexStr === undefined) return;
+  const handleWordActivate = useCallback(
+    (event: React.MouseEvent<HTMLSpanElement> | React.KeyboardEvent<HTMLSpanElement>) => {
+      const target = event.currentTarget;
+      const sentenceIndexStr = target.dataset.sentenceIndex;
+      if (sentenceIndexStr === undefined) return;
 
-    const index = Number.parseInt(sentenceIndexStr, 10);
-    if (Number.isNaN(index)) return;
+      const index = Number.parseInt(sentenceIndexStr, 10);
+      if (Number.isNaN(index)) return;
 
-    if (isContinuousPlay && isPlaying) return;
-    reset();
-    setActiveItemIndex(index);
-    setTimeout(() => { play(); }, 100);
-  }, [isContinuousPlay, isPlaying, play, reset]);
+      if (isContinuousPlay && isPlaying) return;
+      reset();
+      setActiveItemIndex(index);
+      setTimeout(() => {
+        play();
+      }, 100);
+    },
+    [isContinuousPlay, isPlaying, play, reset]
+  );
 
   const handleWordKeyDown = (event: React.KeyboardEvent<HTMLSpanElement>) => {
-    if (event.key === 'Enter' || event.key === ' ') {
+    if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       handleWordActivate(event);
     }
@@ -86,19 +96,17 @@ const EnglishKaraokePlayer = () => {
               {item.words.map((word) => (
                 <span
                   key={`${item.audioUrl}-${word.start}`}
-                  className={`karaoke-word ${itemIndex === activeItemIndex ? 'active-sentence' : ''}`}
+                  className={`karaoke-word ${itemIndex === activeItemIndex ? "active-sentence" : ""}`}
                   data-sentence-index={itemIndex}
                   tabIndex={-1}
                   onClick={handleWordActivate}
                   onKeyDown={handleWordKeyDown}
                 >
-                  <span className="karaoke-original-text">
-                    {word.word}
-                  </span>
+                  <span className="karaoke-original-text">{word.word}</span>
                   <span
                     className="karaoke-highlight-layer"
                     style={{
-                      width: `${itemIndex === activeItemIndex ? getPartialHighlight(word) : 0}%`
+                      width: `${itemIndex === activeItemIndex ? getPartialHighlight(word) : 0}%`,
                     }}
                   >
                     {word.word}
@@ -106,9 +114,7 @@ const EnglishKaraokePlayer = () => {
                 </span>
               ))}
               {/* 文の後ろにスペースを追加 */}
-              {item.widthAdjustment && (
-                <span style={{ width: `${item.widthAdjustment}px` }} />
-              )}
+              {item.widthAdjustment && <span style={{ width: `${item.widthAdjustment}px` }} />}
             </React.Fragment>
           ))}
         </div>
@@ -121,16 +127,12 @@ const EnglishKaraokePlayer = () => {
       </div>
 
       <div className="controls-container controls-bottom">
-        <button
-          type="button"
-          className="karaoke-button"
-          onClick={handleTogglePlay}
-        >
+        <button type="button" className="karaoke-button" onClick={handleTogglePlay}>
           {isPlaying ? "一時停止" : "再生"}
         </button>
         <button
           type="button"
-          className={`karaoke-button ${isContinuousPlay ? 'active' : ''}`}
+          className={`karaoke-button ${isContinuousPlay ? "active" : ""}`}
           onClick={toggleContinuousPlay}
         >
           {isContinuousPlay ? "全文" : "一文"}
@@ -146,12 +148,8 @@ const EnglishKaraokePlayer = () => {
       </div>
 
       {activeAudioUrl && (
-        <audio
-          ref={audioRef}
-          src={activeAudioUrl}
-          onEnded={handleAudioEnd}
-        >
-          <track kind='captions' />
+        <audio ref={audioRef} src={activeAudioUrl} onEnded={handleAudioEnd}>
+          <track kind="captions" />
         </audio>
       )}
     </div>

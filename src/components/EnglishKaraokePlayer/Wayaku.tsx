@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import type { KaraokeText } from './data';
-import './Wayaku.css';
+import { useEffect, useState } from "react";
+import type { KaraokeText } from "./data";
+import "./Wayaku.css";
 
 interface WayakuProps {
   karaokeData: KaraokeText[];
@@ -26,11 +26,13 @@ const Wayaku: React.FC<WayakuProps> = ({ karaokeData, containerRef, textsWrapper
       if (!containerRef.current || !textsWrapperRef.current) return;
 
       // data-sentence-index を持つすべての単語要素を取得
-      const wordElements = Array.from(containerRef.current.querySelectorAll('[data-sentence-index]')) as HTMLElement[];
+      const wordElements = Array.from(
+        containerRef.current.querySelectorAll("[data-sentence-index]")
+      ) as HTMLElement[];
 
       // 文ごとに単語要素をグループ化
       const sentenceGroups = wordElements.reduce<Record<string, HTMLElement[]>>((acc, el) => {
-        const indexStr = el.getAttribute('data-sentence-index');
+        const indexStr = el.getAttribute("data-sentence-index");
         if (indexStr === null) return acc;
         const index = Number.parseInt(indexStr, 10);
         if (Number.isNaN(index)) return acc;
@@ -48,15 +50,15 @@ const Wayaku: React.FC<WayakuProps> = ({ karaokeData, containerRef, textsWrapper
       // 各文グループから位置情報を計算
       const positions = Object.entries(sentenceGroups).map(([indexStr, elements]) => {
         const index = Number.parseInt(indexStr, 10);
-        
+
         // 文の最初の単語の位置
         const firstElement = elements[0];
         const firstRect = firstElement.getBoundingClientRect();
-        
+
         // 位置計算 - テキストラッパーを基準にする
         const top = firstRect.bottom - wrapperRect.top; // 下端基準
         const left = firstRect.left - wrapperRect.left; // 左端基準
-        
+
         return { top, left, index };
       });
 
@@ -68,19 +70,19 @@ const Wayaku: React.FC<WayakuProps> = ({ karaokeData, containerRef, textsWrapper
     // DOMのレンダリングとスタイルの適用を待つために少し遅延させる
     const timerId = setTimeout(calculateTranslationPositions, 100);
 
-    window.addEventListener('resize', calculateTranslationPositions);
+    window.addEventListener("resize", calculateTranslationPositions);
 
     return () => {
       clearTimeout(timerId);
-      window.removeEventListener('resize', calculateTranslationPositions);
+      window.removeEventListener("resize", calculateTranslationPositions);
     };
   }, [containerRef, textsWrapperRef]);
 
   return (
-    <div className='wayaku-wrap'>
+    <div className="wayaku-wrap">
       {karaokeData.map((item, itemIndex) => {
         // translationPositions から対応するインデックスの位置情報を検索
-        const pos = translationPositions.find(p => p.index === itemIndex);
+        const pos = translationPositions.find((p) => p.index === itemIndex);
 
         // 対応する位置情報がない場合は何もレンダリングしない
         if (!pos) return null;
@@ -92,10 +94,13 @@ const Wayaku: React.FC<WayakuProps> = ({ karaokeData, containerRef, textsWrapper
             style={{
               top: `${pos.top}px`,
               left: 0,
-              opacity: 1
+              opacity: 1,
             }}
           >
-            <span className="spacing-span" style={{ width: `${pos.left}px`, display: 'inline-block' }} />
+            <span
+              className="spacing-span"
+              style={{ width: `${pos.left}px`, display: "inline-block" }}
+            />
             <span className="wayaku-text">{item.wayaku}</span>
           </div>
         );

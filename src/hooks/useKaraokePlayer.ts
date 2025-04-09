@@ -1,5 +1,5 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
-import type { WordInfo } from '../components/EnglishKaraokePlayer/data';
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { WordInfo } from "../components/EnglishKaraokePlayer/data";
 // コールバックに渡すアクションの型
 interface KaraokeActions {
   play: () => void;
@@ -35,9 +35,9 @@ export const useKaraokePlayer = ({ audioUrl, onEnded, onNextLine }: UseKaraokePl
         const newTime = audioRef.current.currentTime ?? 0;
         setCurrentTime(newTime);
         if (audioRef.current && !audioRef.current.paused && !audioRef.current.ended) {
-           animationFrameRef.current = requestAnimationFrame(updateTime);
+          animationFrameRef.current = requestAnimationFrame(updateTime);
         } else {
-           cancelAnimationFrameIfExists();
+          cancelAnimationFrameIfExists();
         }
       }
     };
@@ -54,12 +54,15 @@ export const useKaraokePlayer = ({ audioUrl, onEnded, onNextLine }: UseKaraokePl
     // 時間をおいて再生
     setTimeout(() => {
       if (!audioRef.current) return;
-      audioRef.current.play().then(() => {
-        startTimeTracking();
-      }).catch(error => {
-        console.error("[useKaraokePlayer] play (setTimeout): Error playing audio", error); // エラーログ追加
-        setIsPlaying(false); // エラー時は再生状態をリセット
-      });
+      audioRef.current
+        .play()
+        .then(() => {
+          startTimeTracking();
+        })
+        .catch((error) => {
+          console.error("[useKaraokePlayer] play (setTimeout): Error playing audio", error); // エラーログ追加
+          setIsPlaying(false); // エラー時は再生状態をリセット
+        });
     }, 0);
   }, [startTimeTracking]);
 
@@ -73,16 +76,16 @@ export const useKaraokePlayer = ({ audioUrl, onEnded, onNextLine }: UseKaraokePl
 
   // 全文再生モードを切り替える関数
   const toggleContinuousPlay = useCallback(() => {
-    setIsContinuousPlay(prev => !prev);
+    setIsContinuousPlay((prev) => !prev);
   }, []);
 
   // プレイヤーのリセット（外部から呼び出せるように）
   const reset = useCallback(() => {
     if (audioRef.current) {
-        audioRef.current.pause();
-        setIsPlaying(false);
-        audioRef.current.currentTime = 0;
-        setCurrentTime(0);
+      audioRef.current.pause();
+      setIsPlaying(false);
+      audioRef.current.currentTime = 0;
+      setCurrentTime(0);
     }
     cancelAnimationFrameIfExists();
   }, [cancelAnimationFrameIfExists]); // isPlaying, currentTime を依存配列に追加
@@ -90,7 +93,8 @@ export const useKaraokePlayer = ({ audioUrl, onEnded, onNextLine }: UseKaraokePl
   // オーディオ終了時の処理 (play, reset の後に定義)
   const handleAudioEnd = useCallback(() => {
     cancelAnimationFrameIfExists();
-    if (!isContinuousPlay) { // 全文再生中でなければ false にする
+    if (!isContinuousPlay) {
+      // 全文再生中でなければ false にする
       setIsPlaying(false);
     }
     setCurrentTime(0); // 時間をリセット
@@ -111,14 +115,17 @@ export const useKaraokePlayer = ({ audioUrl, onEnded, onNextLine }: UseKaraokePl
   }, [audioUrl]);
 
   // 単語の進行度に基づいた部分ハイライト
-  const getPartialHighlight = useCallback((word: WordInfo): number => {
-    if (currentTime < word.start) return 0;
-    if (currentTime >= word.start + word.duration) return 100;
+  const getPartialHighlight = useCallback(
+    (word: WordInfo): number => {
+      if (currentTime < word.start) return 0;
+      if (currentTime >= word.start + word.duration) return 100;
 
-    // currentTime が word.start と word.start + word.duration の間の場合
-    const progress = word.duration > 0 ? (currentTime - word.start) / word.duration : 0; // Avoid division by zero
-    return Math.min(progress * 100, 100);
-  }, [currentTime]); // currentTime に依存
+      // currentTime が word.start と word.start + word.duration の間の場合
+      const progress = word.duration > 0 ? (currentTime - word.start) / word.duration : 0; // Avoid division by zero
+      return Math.min(progress * 100, 100);
+    },
+    [currentTime]
+  ); // currentTime に依存
 
   return {
     audioRef,

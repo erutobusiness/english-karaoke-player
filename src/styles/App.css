@@ -42,6 +42,6 @@ main {
 }
 
 .tab-button.active {
-  border-bottom: 3px solid #4CAF50;
+  border-bottom: 3px solid #4caf50;
   font-weight: bold;
 }
