@@ -142,16 +142,11 @@ const EnglishKaraokePlayer = () => {
       </div>
 
       <div className="controls-container controls-bottom">
+        {/* 再生／停止ボタン */}
         <button type="button" className="karaoke-button" onClick={handleTogglePlay}>
           {isPlaying ? "停止" : "再生"}
         </button>
-        <button
-          type="button"
-          className={`karaoke-button ${isContinuousPlay ? "active" : ""}`}
-          onClick={toggleContinuousPlay}
-        >
-          {isContinuousPlay ? "全文" : "一文"}
-        </button>
+        {/* リセット */}
         <button
           type="button"
           className="karaoke-button"
@@ -160,6 +155,15 @@ const EnglishKaraokePlayer = () => {
         >
           リセット
         </button>
+        {/* １文／全文ボタン */}
+        <button
+          type="button"
+          className={`karaoke-button ${isContinuousPlay ? "active" : ""}`}
+          onClick={toggleContinuousPlay}
+        >
+          {isContinuousPlay ? "全文" : "１文"}
+        </button>
+        {/* 和訳ボタン */}
         <button
           type="button"
           className={`karaoke-button ${showWayaku ? "active" : "inactive"}`}
@@ -167,6 +171,7 @@ const EnglishKaraokePlayer = () => {
         >
           和訳
         </button>
+        {/* カラオケ／シャドーボタン */}
         <button
           type="button"
           className={`karaoke-button ${isShadowMode ? "active" : "inactive"}`}

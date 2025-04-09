@@ -83,7 +83,6 @@ const Wayaku: React.FC<WayakuProps> = ({ karaokeData, containerRef, textsWrapper
       {karaokeData.map((item, itemIndex) => {
         // translationPositions から対応するインデックスの位置情報を検索
         const pos = translationPositions.find((p) => p.index === itemIndex);
-
         // 対応する位置情報がない場合は何もレンダリングしない
         if (!pos) return null;
 
@@ -91,11 +90,7 @@ const Wayaku: React.FC<WayakuProps> = ({ karaokeData, containerRef, textsWrapper
           <div
             key={`japanese-${item.audioUrl}-${itemIndex}`}
             className="japanese-text-block"
-            style={{
-              top: `${pos.top}px`,
-              left: 0,
-              opacity: 1,
-            }}
+            style={{ top: `${pos.top}px` }}
           >
             <span
               className="spacing-span"
