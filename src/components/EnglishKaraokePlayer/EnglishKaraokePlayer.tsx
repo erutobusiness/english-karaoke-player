@@ -11,6 +11,7 @@ interface KaraokeActions {
 const EnglishKaraokePlayer = () => {
   const [activeItemIndex, setActiveItemIndex] = useState<number>(0);
   const [showWayaku, setShowWayaku] = useState<boolean>(true); // 和訳表示の状態を管理
+  const [isShadowMode, setIsShadowMode] = useState<boolean>(false); // シャドーモードの状態を管理
   const englishContainerRef = useRef<HTMLDivElement>(null);
   const englishTextsWrapperRef = useRef<HTMLDivElement>(null);
 
@@ -91,9 +92,17 @@ const EnglishKaraokePlayer = () => {
     setShowWayaku((prev) => !prev);
   }, []);
 
+  // シャドーモードの切り替え処理
+  const handleToggleShadowMode = useCallback(() => {
+    setIsShadowMode((prev) => !prev);
+  }, []);
+
   return (
     <div className="karaoke-container single-box-inline">
-      <div ref={englishContainerRef} className="karaoke-text-display">
+      <div
+        ref={englishContainerRef}
+        className={`karaoke-text-display ${isShadowMode && "shadow-mode"}`}
+      >
         <div ref={englishTextsWrapperRef} className="english-texts-wrapper">
           {karaokeData.map((item, itemIndex) => (
             <React.Fragment key={`sentence-${item.audioUrl}-${itemIndex}`}>
@@ -157,6 +166,13 @@ const EnglishKaraokePlayer = () => {
           onClick={handleToggleWayaku}
         >
           和訳
+        </button>
+        <button
+          type="button"
+          className={`karaoke-button ${isShadowMode ? "active" : "inactive"}`}
+          onClick={handleToggleShadowMode}
+        >
+          シャドー
         </button>
       </div>
 

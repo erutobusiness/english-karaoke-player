@@ -98,5 +98,9 @@
   overflow: hidden;
   pointer-events: none;
   color: red;
-  background-color: yellow;
+  background-color: white;
+}
+/* シャドーモード */
+.shadow-mode .karaoke-highlight-layer {
+  color: transparent;
 }
