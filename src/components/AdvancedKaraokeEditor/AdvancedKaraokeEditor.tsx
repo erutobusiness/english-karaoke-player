@@ -30,9 +30,6 @@ const AdvancedKaraokeEditor = () => {
   } = useKaraokePlayer({
     audioUrl: audioUrl,
     words: words,
-    onEnded: () => {
-      console.log("Track ended in editor");
-    },
   });
 
   // 再生/停止を切り替える関数
@@ -271,44 +268,32 @@ const AdvancedKaraokeEditor = () => {
 
     const reader = new FileReader();
     reader.onload = (event: ProgressEvent<FileReader>) => {
-      try {
-        const result = event.target?.result;
-        if (typeof result === "string") {
-          const project = JSON.parse(result);
-          if (project && typeof project === "object" && Array.isArray(project.words)) {
-            const validatedWords = project.words.filter((w: unknown): w is WordInfo => {
-              // WordInfo 型を使用
-              if (typeof w !== "object" || w === null) {
-                return false;
-              }
-              const obj = w as Record<string, unknown>;
-              return (
-                typeof obj.word === "string" &&
-                typeof obj.start === "number" &&
-                typeof obj.duration === "number"
-              );
-            });
-            setWords(validatedWords);
-            setText(project.text || validatedWords.map((w: WordInfo) => w.word).join(" ")); // WordInfo 型を使用
-            setAudioDuration(project.audioDuration || 0);
-            resetPlayer();
-            setSelectedWordIndex(-1);
-            setPreviewMode(false);
-          } else {
-            console.error("Invalid project file structure");
-            alert("プロジェクトファイルの構造が無効です。");
-          }
-        } else {
-          console.error("Failed to read file content as text");
-          alert("ファイルの読み込みに失敗しました。");
+      const result = event.target?.result;
+      if (typeof result === "string") {
+        const project = JSON.parse(result);
+        if (project && typeof project === "object" && Array.isArray(project.words)) {
+          const validatedWords = project.words.filter((w: unknown): w is WordInfo => {
+            // WordInfo 型を使用
+            if (typeof w !== "object" || w === null) {
+              return false;
+            }
+            const obj = w as Record<string, unknown>;
+            return (
+              typeof obj.word === "string" &&
+              typeof obj.start === "number" &&
+              typeof obj.duration === "number"
+            );
+          });
+          setWords(validatedWords);
+          setText(project.text || validatedWords.map((w: WordInfo) => w.word).join(" ")); // WordInfo 型を使用
+          setAudioDuration(project.audioDuration || 0);
+          resetPlayer();
+          setSelectedWordIndex(-1);
+          setPreviewMode(false);
         }
-      } catch (error) {
-        console.error("Failed to parse project file:", error);
-        alert("プロジェクトファイルの読み込みに失敗しました。");
       }
     };
     reader.readAsText(file);
-    // Reset file input to allow importing the same file again
     e.target.value = "";
   };
 

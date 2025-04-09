@@ -59,8 +59,7 @@ export const useKaraokePlayer = ({ audioUrl, onEnded, onNextLine }: UseKaraokePl
         .then(() => {
           startTimeTracking();
         })
-        .catch((error) => {
-          console.error("[useKaraokePlayer] play (setTimeout): Error playing audio", error); // エラーログ追加
+        .catch(() => {
           setIsPlaying(false); // エラー時は再生状態をリセット
         });
     }, 0);

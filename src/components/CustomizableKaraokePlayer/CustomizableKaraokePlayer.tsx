@@ -16,17 +16,11 @@ const CustomizableKaraokePlayer = () => {
   // useKaraokePlayer フックを使用
   const { audioRef, isPlaying, play, pause, reset, getPartialHighlight, handleAudioEnd } =
     useKaraokePlayer({
-      // selectedSample が null の可能性を考慮 (初期レンダリングなど)
       audioUrl: selectedSample?.audioUrl ?? "",
       words: selectedSample?.words ?? [],
-      // このコンポーネントでは曲が終わっても自動で次に進まないので onEnded はシンプルにリセットのみ
-      onEnded: () => {
-        // 必要であれば追加の処理
-        console.log("Track ended in CustomizableKaraokePlayer");
-      },
     });
 
-  // 再生/停止を切り替える関数
+  // 再生/停止ボタンのハンドラ
   const handleTogglePlay = () => {
     if (isPlaying) {
       pause();
