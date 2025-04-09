@@ -61,30 +61,23 @@
   position: relative;
   vertical-align: baseline;
   margin: 0 2px;
-  display: inline-block;
-  white-space: normal;
+  cursor: pointer;
 }
 
 /* カラオケ */
 .karaoke-original-text {
   position: relative;
-  z-index: 0;
   color: black;
 }
 
-.sentence-space {
-  width: 0.5em;
-}
-
+/* カラオケアニメーション */
 .karaoke-highlight-layer {
   position: absolute;
   top: 0;
   left: 0;
   height: 100%;
   overflow: hidden;
-  white-space: normal;
   pointer-events: none;
-  z-index: 1;
   color: red;
   background-color: yellow;
 }

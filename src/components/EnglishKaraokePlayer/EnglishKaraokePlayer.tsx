@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { karaokeData } from './data';
 import { useKaraokePlayer } from '../../hooks/useKaraokePlayer';
 import Wayaku from './Wayaku';
@@ -81,36 +81,36 @@ const EnglishKaraokePlayer = () => {
     <div className="karaoke-container single-box-inline">
       <div ref={englishContainerRef} className="karaoke-text-display">
         <div ref={englishTextsWrapperRef} className="english-texts-wrapper">
-          {karaokeData.flatMap((item, itemIndex) => {
-            const wordSpans = item.words.map((word) => (
-              <span
-                key={`${item.audioUrl}-${word.start}`}
-                className={`karaoke-word ${itemIndex === activeItemIndex ? 'active-sentence' : ''}`}
-                data-sentence-index={itemIndex}
-                tabIndex={-1}
-                onClick={handleWordActivate}
-                onKeyDown={handleWordKeyDown}
-                style={{ cursor: 'pointer' }}
-              >
-                <span className="karaoke-original-text">
-                  {word.word}
-                </span>
+          {karaokeData.map((item, itemIndex) => (
+            <React.Fragment key={`sentence-${item.audioUrl}-${itemIndex}`}>
+              {item.words.map((word) => (
                 <span
-                  className="karaoke-highlight-layer"
-                  style={{
-                    width: `${itemIndex === activeItemIndex ? getPartialHighlight(word) : 0}%`
-                  }}
+                  key={`${item.audioUrl}-${word.start}`}
+                  className={`karaoke-word ${itemIndex === activeItemIndex ? 'active-sentence' : ''}`}
+                  data-sentence-index={itemIndex}
+                  tabIndex={-1}
+                  onClick={handleWordActivate}
+                  onKeyDown={handleWordKeyDown}
                 >
-                  {word.word}
+                  <span className="karaoke-original-text">
+                    {word.word}
+                  </span>
+                  <span
+                    className="karaoke-highlight-layer"
+                    style={{
+                      width: `${itemIndex === activeItemIndex ? getPartialHighlight(word) : 0}%`
+                    }}
+                  >
+                    {word.word}
+                  </span>
                 </span>
-              </span>
-            ));
-
-            if (itemIndex < karaokeData.length - 1) {
-              return wordSpans.concat(<span key={`karaoke-space-${item.text}`} className="sentence-space" />);
-            }
-            return wordSpans;
-          })}
+              ))}
+              {/* 文の後ろにスペースを追加 */}
+              {item.widthAdjustment && (
+                <span style={{ width: `${item.widthAdjustment}px` }} />
+              )}
+            </React.Fragment>
+          ))}
         </div>
 
         <Wayaku
