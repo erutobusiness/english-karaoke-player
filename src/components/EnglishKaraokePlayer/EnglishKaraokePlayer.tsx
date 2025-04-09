@@ -3,7 +3,6 @@ import { karaokeData } from './data';
 import { useKaraokePlayer } from '../../hooks/useKaraokePlayer';
 import Wayaku from './Wayaku';
 
-// useKaraokePlayer から渡されるアクションの型を定義 (フック側と合わせる)
 interface KaraokeActions {
   play: () => void;
   reset: () => void;
@@ -11,9 +10,7 @@ interface KaraokeActions {
 
 const EnglishKaraokePlayer = () => {
   const [activeItemIndex, setActiveItemIndex] = useState<number>(0);
-  // 英文全体のコンテナへのref
   const englishContainerRef = useRef<HTMLDivElement>(null);
-  // 英文テキスト用のラッパーへのref
   const englishTextsWrapperRef = useRef<HTMLDivElement>(null);
 
   const activeKaraokeData = karaokeData[activeItemIndex];
@@ -30,7 +27,6 @@ const EnglishKaraokePlayer = () => {
     }
   }, [activeItemIndex]);
 
-  // onNextLine に直接 handleNextLine を渡す
   const {
     audioRef,
     isPlaying,
@@ -48,32 +44,27 @@ const EnglishKaraokePlayer = () => {
     onNextLine: handleNextLine,
   });
 
-  // 単語クリック/キーダウン時のハンドラ (イベントから sentenceIndex を取得)
   const handleWordActivate = useCallback((event: React.MouseEvent<HTMLSpanElement> | React.KeyboardEvent<HTMLSpanElement>) => {
     const target = event.currentTarget;
     const sentenceIndexStr = target.dataset.sentenceIndex;
     if (sentenceIndexStr === undefined) return;
 
-    const index = Number.parseInt(sentenceIndexStr, 10); // Use Number.parseInt
-    if (Number.isNaN(index)) return; // Use Number.isNaN
+    const index = Number.parseInt(sentenceIndexStr, 10);
+    if (Number.isNaN(index)) return;
 
-    // 元の handleActivate のロジックを実行
     if (isContinuousPlay && isPlaying) return;
     reset();
     setActiveItemIndex(index);
     setTimeout(() => { play(); }, 100);
-  }, [isContinuousPlay, isPlaying, play, reset]); // 依存関係は元の handleActivate と同じ
+  }, [isContinuousPlay, isPlaying, play, reset]);
 
-  // 単語のキーボード操作ハンドラ
   const handleWordKeyDown = (event: React.KeyboardEvent<HTMLSpanElement>) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
-      handleWordActivate(event); // クリックと同じ処理を呼び出す
+      handleWordActivate(event);
     }
   };
 
-
-  // 再生/停止トグルハンドラ
   const handleTogglePlay = useCallback(() => {
     if (isPlaying) {
       pause();
@@ -82,7 +73,6 @@ const EnglishKaraokePlayer = () => {
     }
   }, [isPlaying, play, pause]);
 
-  // 停止ハンドラ
   const handleStop = useCallback(() => {
     reset();
   }, [reset]);
@@ -90,11 +80,8 @@ const EnglishKaraokePlayer = () => {
   return (
     <div className="karaoke-container single-box-inline">
       <div ref={englishContainerRef} className="karaoke-text-display">
-        {/* 英文表示エリア */}
         <div ref={englishTextsWrapperRef} className="english-texts-wrapper">
-          {/* flatMap を使用して全単語をフラットにレンダリング */}
           {karaokeData.flatMap((item, itemIndex) => {
-            // Map words to their spans
             const wordSpans = item.words.map((word) => (
               <span
                 key={`${item.audioUrl}-${word.start}`}
@@ -116,26 +103,20 @@ const EnglishKaraokePlayer = () => {
                 >
                   {word.word}
                 </span>
-                {/* Add a space after each word */}
-                {' '}
               </span>
             ));
 
-            // Add a space span after the sentence if it's not the last one
             if (itemIndex < karaokeData.length - 1) {
-              return wordSpans.concat(<span key={`space-${itemIndex}`}>{' '}</span>);
+              return wordSpans.concat(<span key={`karaoke-space-${item.text}`} className="sentence-space" />);
             }
-            // If it's the last sentence, just return the word spans
             return wordSpans;
-          // End of flatMap callback
           })}
         </div>
 
-        {/* 和訳コンポーネント */}
-        <Wayaku 
-          karaokeData={karaokeData} 
-          containerRef={englishContainerRef} 
-          textsWrapperRef={englishTextsWrapperRef} 
+        <Wayaku
+          karaokeData={karaokeData}
+          containerRef={englishContainerRef}
+          textsWrapperRef={englishTextsWrapperRef}
         />
       </div>
 

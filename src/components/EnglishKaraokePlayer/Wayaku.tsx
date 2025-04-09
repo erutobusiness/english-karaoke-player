@@ -11,7 +11,6 @@ interface WayakuProps {
 interface TranslationPosition {
   top: number;
   left: number;
-  width: number;
   index: number;
 }
 
@@ -54,18 +53,11 @@ const Wayaku: React.FC<WayakuProps> = ({ karaokeData, containerRef, textsWrapper
         const firstElement = elements[0];
         const firstRect = firstElement.getBoundingClientRect();
         
-        // 文の最後の単語の位置
-        const lastElement = elements[elements.length - 1];
-        const lastRect = lastElement.getBoundingClientRect();
-        
-        // 文全体の幅を計算（最後の単語の右端 - 最初の単語の左端）
-        const sentenceWidth = (lastRect.left + lastRect.width) - firstRect.left;
-        
         // 位置計算 - テキストラッパーを基準にする
         const top = firstRect.bottom - wrapperRect.top; // 下端基準
         const left = firstRect.left - wrapperRect.left; // 左端基準
         
-        return { top, left, width: sentenceWidth, index };
+        return { top, left, index };
       });
 
       // インデックス順にソート
@@ -82,36 +74,33 @@ const Wayaku: React.FC<WayakuProps> = ({ karaokeData, containerRef, textsWrapper
       clearTimeout(timerId);
       window.removeEventListener('resize', calculateTranslationPositions);
     };
-  }, [containerRef, textsWrapperRef]); // 依存配列にtextsWrapperRefを追加
+  }, [containerRef, textsWrapperRef]);
 
   return (
-    <>
-      {/* 和訳表示 */}
-      <div className='wayaku-wrap'>
-        {karaokeData.map((item, itemIndex) => {
-          // translationPositions から対応するインデックスの位置情報を検索
-          const pos = translationPositions.find(p => p.index === itemIndex);
+    <div className='wayaku-wrap'>
+      {karaokeData.map((item, itemIndex) => {
+        // translationPositions から対応するインデックスの位置情報を検索
+        const pos = translationPositions.find(p => p.index === itemIndex);
 
-          // 対応する位置情報がない場合は何もレンダリングしない
-          if (!pos) return null;
+        // 対応する位置情報がない場合は何もレンダリングしない
+        if (!pos) return null;
 
-          return (
-            <div
-              key={`japanese-${item.audioUrl}-${itemIndex}`}
-              className="japanese-text-block"
-              style={{
-                top: `${pos.top}px`,
-                left: 0, // leftを0に設定
-                opacity: translationPositions.length > 0 ? 1 : 0
-              }}
-            >
-              <span className="spacing-span" style={{ width: `${pos.left}px`, display: 'inline-block' }} />
-              <span className="wayaku-text">{item.wayaku}</span>
-            </div>
-          );
-        })}
-      </div>
-    </>
+        return (
+          <div
+            key={`japanese-${item.audioUrl}-${itemIndex}`}
+            className="japanese-text-block"
+            style={{
+              top: `${pos.top}px`,
+              left: 0,
+              opacity: 1
+            }}
+          >
+            <span className="spacing-span" style={{ width: `${pos.left}px`, display: 'inline-block' }} />
+            <span className="wayaku-text">{item.wayaku}</span>
+          </div>
+        );
+      })}
+    </div>
   );
 };
 

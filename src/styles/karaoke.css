@@ -16,33 +16,30 @@
   border-radius: 8px;
   min-height: 100px;
   background-color: #fff;
-  position: relative; /* 位置決め用 */
+  position: relative;
 }
 
 /* 英文のワードラッパー */
 .english-texts-wrapper {
-  display: flex; /* Use Flexbox */
-  flex-wrap: wrap; /* Allow items to wrap */
+  display: flex;
+  flex-wrap: wrap;
   position: relative;
   width: 100%;
-  /* overflow-wrap: break-word; */ /* Test: Remove to see if it affects inline element wrapping */
 }
 
-/* .english-text-button styles removed as the element is removed from JSX */
 /* Base Controls Container */
 .controls-container {
   display: flex;
   gap: 10px;
-  align-items: center; /* Common alignment */
-  /* Specific layout (margin, justify-content) defined by component */
+  align-items: center;
 }
 
-/* Base Button Style */
+/* 共通ボタン */
 .karaoke-button {
-  padding: 10px 20px; /* Default padding */
-  font-size: 16px; /* Default font size */
+  padding: 10px 20px;
+  font-size: 16px;
   cursor: pointer;
-  background-color: #4CAF50; /* Default green background */
+  background-color: #4CAF50;
   color: white;
   border: none;
   border-radius: 4px;
@@ -51,41 +48,32 @@
   display: inline-block;
   text-decoration: none;
 }
-
 .karaoke-button:hover {
-  background-color: #45a049; /* Darker green on hover */
+  background-color: #45a049;
 }
-
 .karaoke-button:disabled {
   background-color: #ccc;
   cursor: not-allowed;
 }
 
-/* --- Animation Styles --- */
-
-/* .karaoke-word-container definition removed as the element is removed from JSX */
-
+/* カラオケ単語 */
 .karaoke-word {
-  position: relative; /* Restore relative positioning for highlight layer context */
-  vertical-align: baseline; /* Moved from container */
-  margin: 0 2px; /* Moved from container */
-  display: inline-block; /* Use inline-block to better contain the absolute highlight layer */
-  white-space: normal; /* Allow normal wrapping */
+  position: relative;
+  vertical-align: baseline;
+  margin: 0 2px;
+  display: inline-block;
+  white-space: normal;
 }
 
+/* カラオケ */
 .karaoke-original-text {
   position: relative;
   z-index: 0;
   color: black;
 }
 
-.preview-section {
-  color: black;
-}
-.preview-section .karaoke-highlight-layer {
-  --karaoke-highlight-color: red;
-  --karaoke-highlight-bg-color: yellow;
-  --karaoke-highlight-blend-mode: multiply;
+.sentence-space {
+  width: 0.5em;
 }
 
 .karaoke-highlight-layer {
@@ -97,8 +85,6 @@
   white-space: normal;
   pointer-events: none;
   z-index: 1;
-
-  color: var(--karaoke-highlight-color, red);
-  background-color: var(--karaoke-highlight-bg-color, yellow);
-  mix-blend-mode: var(--karaoke-highlight-blend-mode, normal);
+  color: red;
+  background-color: yellow;
 }

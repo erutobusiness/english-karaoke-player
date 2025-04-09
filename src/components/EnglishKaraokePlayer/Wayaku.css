@@ -4,8 +4,6 @@
   left: 20px; /* karaoke-text-displayのpadding値と同じ */
   right: 20px; /* karaoke-text-displayのpadding値と同じ */
   bottom: 20px; /* karaoke-text-displayのpadding値と同じ */
-  width: auto; /* widthとheightはrightとbottomを使うので不要 */
-  height: auto;
   pointer-events: none; /* 下層のテキスト選択などを妨げないように */
 }
 
@@ -13,21 +11,11 @@
 .japanese-text-block {
   position: absolute;
   left: 0;
-  /*  */
-  font-size: 0.75em;
+  font-size: 16px;
   color: #333;
   font-family: sans-serif;
   pointer-events: none;
-  white-space: normal;
-  display: block;
-  overflow: visible;
   z-index: 1;
-  width: 100%; /* 親Divと同じ幅に設定 */
-  word-wrap: break-word;
-  word-break: break-word;
-  padding: 3px 20px 3px 3px;
-  border-radius: 3px;
-  letter-spacing: 0.02em;
   box-sizing: border-box;
   transition: opacity 0.3s ease;
   /* 位置調整 */
@@ -44,14 +32,4 @@
 .spacing-span {
   display: inline-block;
   height: 1px; /* 高さは最小限に */
-}
-
-/* 英文の測定用要素 */
-.english-measure {
-  visibility: hidden;
-  position: absolute;
-  white-space: nowrap;
-  font-size: 24px;
-  font-family: Arial, sans-serif;
-  pointer-events: none;
 }
