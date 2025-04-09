@@ -1,85 +1,80 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { KaraokeText } from './data';
 import './Wayaku.css';
 
 interface WayakuProps {
   karaokeData: KaraokeText[];
   containerRef: React.RefObject<HTMLDivElement | null>;
+  textsWrapperRef: React.RefObject<HTMLDivElement | null>;
 }
 
 interface TranslationPosition {
   top: number;
   left: number;
   width: number;
-  index: number; // 文のインデックスを追加
+  index: number;
 }
 
 /**
  * 和訳表示用コンポーネント
  * 英文の下に和訳を表示する
  */
-const Wayaku: React.FC<WayakuProps> = ({ karaokeData, containerRef }) => {
+const Wayaku: React.FC<WayakuProps> = ({ karaokeData, containerRef, textsWrapperRef }) => {
   const [translationPositions, setTranslationPositions] = useState<TranslationPosition[]>([]);
-  const measureRef = useRef<HTMLSpanElement>(null); // 和訳測定用
 
   useEffect(() => {
     const calculateTranslationPositions = () => {
-      if (!containerRef.current || !measureRef.current) return;
+      if (!containerRef.current || !textsWrapperRef.current) return;
 
       // data-sentence-index を持つすべての単語要素を取得
       const wordElements = Array.from(containerRef.current.querySelectorAll('[data-sentence-index]')) as HTMLElement[];
 
-      // 文ごとに最初の単語要素の位置情報を抽出
-      const sentenceRects = wordElements.reduce<Array<{ rect: DOMRect; index: number }>>((acc, el) => {
+      // 文ごとに単語要素をグループ化
+      const sentenceGroups = wordElements.reduce<Record<string, HTMLElement[]>>((acc, el) => {
         const indexStr = el.getAttribute('data-sentence-index');
         if (indexStr === null) return acc;
         const index = Number.parseInt(indexStr, 10);
         if (Number.isNaN(index)) return acc;
 
-        // 同じインデックスの要素がまだ追加されていなければ追加
-        if (!acc.some(item => item.index === index)) {
-          acc.push({
-            rect: el.getBoundingClientRect(), // 最初の単語の位置
-            index: index,
-          });
+        if (!acc[index]) {
+          acc[index] = [];
         }
+        acc[index].push(el);
         return acc;
-      }, []);
+      }, {});
 
-      // インデックス順にソート
-      sentenceRects.sort((a, b) => a.index - b.index);
+      // より直接的な親要素であるテキストラッパーの位置情報を取得
+      const wrapperRect = textsWrapperRef.current.getBoundingClientRect();
 
-      const containerRect = containerRef.current.getBoundingClientRect();
-
-      // 各文に対応する和訳の位置を計算
-      const positions = sentenceRects.map(({ rect, index }) => { // map の引数を修正
-        if (measureRef.current) {
-          const wayakuText = karaokeData[index]?.wayaku || ''; // ?. を追加して安全にアクセス
-          measureRef.current.textContent = wayakuText;
-          const wayakuWidth = measureRef.current.offsetWidth;
-
-          // 位置計算 (getBoundingClientRect を基準に戻す)
-          const top = rect.bottom - containerRect.top + 2; // 下端基準、オフセット+2
-          const left = rect.left - containerRect.left; // 元の計算方法に戻す
-          const width = wayakuWidth; // 和訳テキストの幅を使用
-
-          return { top, left, width, index }; // index を含める
-        }
-
-        // fallback (measureRefがない場合)
-        return {
-          top: rect.bottom - containerRect.top + 2, // 下端基準、オフセット+2
-          left: rect.left - containerRect.left, // 元の計算方法に戻す
-          width: rect.width, // 最初の単語の幅
-          index: index // index を含める
-        };
+      // 各文グループから位置情報を計算
+      const positions = Object.entries(sentenceGroups).map(([indexStr, elements]) => {
+        const index = Number.parseInt(indexStr, 10);
+        
+        // 文の最初の単語の位置
+        const firstElement = elements[0];
+        const firstRect = firstElement.getBoundingClientRect();
+        
+        // 文の最後の単語の位置
+        const lastElement = elements[elements.length - 1];
+        const lastRect = lastElement.getBoundingClientRect();
+        
+        // 文全体の幅を計算（最後の単語の右端 - 最初の単語の左端）
+        const sentenceWidth = (lastRect.left + lastRect.width) - firstRect.left;
+        
+        // 位置計算 - テキストラッパーを基準にする
+        const top = firstRect.bottom - wrapperRect.top; // 下端基準
+        const left = firstRect.left - wrapperRect.left; // 左端基準
+        
+        return { top, left, width: sentenceWidth, index };
       });
 
+      // インデックス順にソート
+      positions.sort((a, b) => a.index - b.index);
       setTranslationPositions(positions);
     };
 
     // DOMのレンダリングとスタイルの適用を待つために少し遅延させる
-    const timerId = setTimeout(calculateTranslationPositions, 100); // 遅延を短縮
+    const timerId = setTimeout(calculateTranslationPositions, 100);
 
     window.addEventListener('resize', calculateTranslationPositions);
 
@@ -87,57 +82,35 @@ const Wayaku: React.FC<WayakuProps> = ({ karaokeData, containerRef }) => {
       clearTimeout(timerId);
       window.removeEventListener('resize', calculateTranslationPositions);
     };
-  }, [karaokeData, containerRef]); // 依存配列に containerRef を含める
+  }, [containerRef, textsWrapperRef]); // 依存配列にtextsWrapperRefを追加
 
   return (
     <>
-      {/* 測定用の隠し要素 - 和訳用 */}
-      <span
-        ref={measureRef}
-        className="wayaku-measure"
-        style={{
-          position: 'absolute',
-          visibility: 'hidden',
-          height: 'auto',
-          width: 'auto',
-          whiteSpace: 'nowrap', // 正確な幅測定のため
-        }}
-      />
-
       {/* 和訳表示 */}
-      {karaokeData.map((item, itemIndex) => {
-        // translationPositions から対応するインデックスの位置情報を検索
-        const pos = translationPositions.find(p => p.index === itemIndex);
+      <div className='wayaku-wrap'>
+        {karaokeData.map((item, itemIndex) => {
+          // translationPositions から対応するインデックスの位置情報を検索
+          const pos = translationPositions.find(p => p.index === itemIndex);
 
-        // 対応する位置情報がない場合は何もレンダリングしない
-        if (!pos) {
-           // console.warn(`Position data for index ${itemIndex} not found.`); // デバッグ用（必要ならコメント解除）
-           return null;
-        }
+          // 対応する位置情報がない場合は何もレンダリングしない
+          if (!pos) return null;
 
-
-        return (
-          <div
-            key={`japanese-${item.audioUrl}-${itemIndex}`} // よりユニークなキー
-            className="japanese-text-block"
-            style={{
-              position: 'absolute',
-              top: `${pos.top}px`, // 単位を追加
-              left: `${pos.left}px`, // 単位を追加
-              width: `${pos.width}px`, // 単位を追加
-              boxSizing: 'border-box',
-              opacity: translationPositions.length > 0 ? 1 : 0,
-              transition: 'opacity 0.3s ease',
-              pointerEvents: 'none', // 和訳がクリックイベントを妨げないように
-              fontSize: '0.5em', // フォントサイズをさらに小さく
-              color: '#333', // 色を濃くする (黒に近いグレー)
-              lineHeight: '4', // 行間調整
-            }}
-          >
-            {item.wayaku}
-          </div>
-        );
-      })}
+          return (
+            <div
+              key={`japanese-${item.audioUrl}-${itemIndex}`}
+              className="japanese-text-block"
+              style={{
+                top: `${pos.top}px`,
+                left: 0, // leftを0に設定
+                opacity: translationPositions.length > 0 ? 1 : 0
+              }}
+            >
+              <span className="spacing-span" style={{ width: `${pos.left}px`, display: 'inline-block' }} />
+              <span className="wayaku-text">{item.wayaku}</span>
+            </div>
+          );
+        })}
+      </div>
     </>
   );
 };

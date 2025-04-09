@@ -13,6 +13,8 @@ const EnglishKaraokePlayer = () => {
   const [activeItemIndex, setActiveItemIndex] = useState<number>(0);
   // 英文全体のコンテナへのref
   const englishContainerRef = useRef<HTMLDivElement>(null);
+  // 英文テキスト用のラッパーへのref
+  const englishTextsWrapperRef = useRef<HTMLDivElement>(null);
 
   const activeKaraokeData = karaokeData[activeItemIndex];
   const activeAudioUrl = activeKaraokeData?.audioUrl ?? '';
@@ -89,7 +91,7 @@ const EnglishKaraokePlayer = () => {
     <div className="karaoke-container single-box-inline">
       <div ref={englishContainerRef} className="karaoke-text-display">
         {/* 英文表示エリア */}
-        <div className="english-texts-wrapper">
+        <div ref={englishTextsWrapperRef} className="english-texts-wrapper">
           {/* flatMap を使用して全単語をフラットにレンダリング */}
           {karaokeData.flatMap((item, itemIndex) => {
             // Map words to their spans
@@ -130,7 +132,11 @@ const EnglishKaraokePlayer = () => {
         </div>
 
         {/* 和訳コンポーネント */}
-        <Wayaku karaokeData={karaokeData} containerRef={englishContainerRef} />
+        <Wayaku 
+          karaokeData={karaokeData} 
+          containerRef={englishContainerRef} 
+          textsWrapperRef={englishTextsWrapperRef} 
+        />
       </div>
 
       <div className="controls-container controls-bottom">
