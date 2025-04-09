@@ -59,14 +59,13 @@ const EnglishKaraokePlayer = () => {
       const index = Number.parseInt(sentenceIndexStr, 10);
       if (Number.isNaN(index)) return;
 
-      if (isContinuousPlay && isPlaying) return;
       reset();
       setActiveItemIndex(index);
       setTimeout(() => {
         play();
       }, 100);
     },
-    [isContinuousPlay, isPlaying, play, reset]
+    [play, reset]
   );
 
   const handleWordKeyDown = (event: React.KeyboardEvent<HTMLSpanElement>) => {
