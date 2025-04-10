@@ -1,9 +1,8 @@
 import { useState } from "react";
 import "./styles/App.css";
 import "./styles/karaoke.css";
-import AdvancedKaraokeEditor from "./components/AdvancedKaraokeEditor/AdvancedKaraokeEditor";
-import CustomizableKaraokePlayer from "./components/CustomizableKaraokePlayer/CustomizableKaraokePlayer";
-import EnglishKaraokePlayer from "./components/EnglishKaraokePlayer/EnglishKaraokePlayer";
+import Basic from "./components/Basic/Basic";
+import Speaker from "./components/Speaker/Speaker";
 
 function App() {
   const [activeTab, setActiveTab] = useState("basic");
@@ -21,28 +20,20 @@ function App() {
               className={`tab-button ${activeTab === "basic" ? "active" : ""}`}
               onClick={() => setActiveTab("basic")}
             >
-              基本プレーヤー
+              基本
             </button>
             <button
               type="button"
-              className={`tab-button ${activeTab === "customizable" ? "active" : ""}`}
-              onClick={() => setActiveTab("customizable")}
+              className={`tab-button ${activeTab === "speaker" ? "active" : ""}`}
+              onClick={() => setActiveTab("speaker")}
             >
-              カスタマイズ
-            </button>
-            <button
-              type="button"
-              className={`tab-button ${activeTab === "advanced" ? "active" : ""}`}
-              onClick={() => setActiveTab("advanced")}
-            >
-              高度なエディター
+              話者
             </button>
           </div>
 
           <div className="tab-content">
-            {activeTab === "basic" && <EnglishKaraokePlayer />}
-            {activeTab === "customizable" && <CustomizableKaraokePlayer />}
-            {activeTab === "advanced" && <AdvancedKaraokeEditor />}
+            {activeTab === "basic" && <Basic />}
+            {activeTab === "speaker" && <Speaker />}
           </div>
         </div>
       </main>

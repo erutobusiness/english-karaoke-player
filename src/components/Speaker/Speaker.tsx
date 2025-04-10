@@ -1,3 +1,4 @@
+// filepath: c:\english-karaoke-player\src\components\Speaker\Speaker.tsx
 import React, { useState, useCallback, useRef } from "react";
 import { useKaraokePlayer } from "../../hooks/useKaraokePlayer";
 import { useAutoScroll } from "../../hooks/useAutoScroll";
@@ -9,7 +10,7 @@ interface KaraokeActions {
   reset: () => void;
 }
 
-const EnglishKaraokePlayer = () => {
+const Speaker = () => {
   const [activeItemIndex, setActiveItemIndex] = useState<number>(0);
   const [activeWordIndex, setActiveWordIndex] = useState<number>(0); // アクティブな単語のインデックス
   const [showWayaku, setShowWayaku] = useState<boolean>(true); // 和訳表示の状態を管理
@@ -211,4 +212,4 @@ const EnglishKaraokePlayer = () => {
   );
 };
 
-export default EnglishKaraokePlayer;
+export default Speaker;

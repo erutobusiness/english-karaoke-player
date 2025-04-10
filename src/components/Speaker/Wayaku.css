@@ -1,0 +1,35 @@
+.wayaku-wrap {
+  position: absolute;
+  top: 20px; /* karaoke-text-displayのpadding値と同じ */
+  left: 20px; /* karaoke-text-displayのpadding値と同じ */
+  right: 20px; /* karaoke-text-displayのpadding値と同じ */
+  bottom: 20px; /* karaoke-text-displayのpadding値と同じ */
+  pointer-events: none; /* 下層のテキスト選択などを妨げないように */
+}
+
+/* 和訳ブロック */
+.japanese-text-block {
+  position: absolute;
+  left: 0;
+  font-size: 16px;
+  color: #333;
+  font-family: sans-serif;
+  pointer-events: none;
+  z-index: 1;
+  box-sizing: border-box;
+  transition: opacity 0.3s ease;
+  /* 位置調整 */
+  margin-top: -24px;
+  line-height: 48px;
+}
+
+/* 和訳テキスト用のスタイル */
+.wayaku-text {
+  display: inline;
+}
+
+/* スペーシング用のspan */
+.spacing-span {
+  display: inline-block;
+  height: 1px; /* 高さは最小限に */
+}

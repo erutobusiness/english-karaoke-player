@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { WordInfo } from "../components/EnglishKaraokePlayer/data";
+import type { WordInfo } from "../components/Basic/data";
+
 // コールバックに渡すアクションの型
 interface KaraokeActions {
   play: () => void;
