@@ -80,7 +80,7 @@ export const useKaraokePlayer = ({
     setIsPlaying(false);
     audioRef.current.pause();
     cancelAnimationFrameIfExists();
-  }, [cancelAnimationFrameIfExists]); // isPlaying を依存配列に追加
+  }, [cancelAnimationFrameIfExists]);
 
   // 全文再生モードを切り替える関数
   const toggleContinuousPlay = useCallback(() => {
@@ -96,7 +96,7 @@ export const useKaraokePlayer = ({
       setCurrentTime(0);
     }
     cancelAnimationFrameIfExists();
-  }, [cancelAnimationFrameIfExists]); // isPlaying, currentTime を依存配列に追加
+  }, [cancelAnimationFrameIfExists]);
 
   // オーディオ終了時の処理 (play, reset の後に定義)
   const handleAudioEnd = useCallback(() => {
@@ -112,7 +112,7 @@ export const useKaraokePlayer = ({
     } else if (onEnded) {
       onEnded();
     }
-  }, [isContinuousPlay, onNextLine, onEnded, cancelAnimationFrameIfExists, play, reset]); // 依存配列は変更なし
+  }, [isContinuousPlay, onNextLine, onEnded, cancelAnimationFrameIfExists, play, reset]);
 
   // audioUrl が変わった時に audio の src を更新
   useEffect(() => {
@@ -133,7 +133,7 @@ export const useKaraokePlayer = ({
       return Math.min(progress * 100, 100);
     },
     [currentTime]
-  ); // currentTime に依存
+  );
 
   // 現在の時間に基づいて、アクティブな単語を特定する
   useEffect(() => {
